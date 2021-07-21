@@ -347,7 +347,26 @@ max(abs(relgrad))
 #                        verbose = TRUE,
 #                        data = db_of7_new)
 
+relgrad <- with(polymodels$avgface3@optinfo$derivs,solve(Hessian,gradient))
+max(abs(relgrad))
 
+plot(polymodels$avgface3)
+anova(polymodels$avgface3)
+emmeans::emmeans(polymodels$avgface3, pairwise ~ Emotion, adjust = 'bonf')
+
+emmeans::emmeans(polymodels$avgface3, pairwise ~ Emotion|Dataset, adjust = 'bonf')
+
+emmeans::emmeans(polymodels$avgface3, pairwise ~ Emotion|morph, adjust = 'bonf')
+
+
+emmeans::emmeans(polymodels$avgface3, pairwise ~ Emotion|ot1, adjust = 'bonf')
+
+
+
+```
+
+store datasets
+```
 # dataset for polynomial analyses
 
 
@@ -362,4 +381,20 @@ write_csv(data_poly_analyses, "data_poly_analyses.csv")
 
 
 
+```
+
+Save data
+
+```{r}
+save(polymodels, db_of7_new, db_of7_new_2021, figure4, Figure3, Figure3Panel, data_fig2, data_fig3, data_poly_analyses, file = "Study1_part1.RData")
+
+# raw data study 1
+
+colnames(db_of7_new)
+
+Study1_Raw<- select(db_of7_new, c(1:45))
+# x and y coordinates from openface
+
+saveRDS(Study1_Raw, "Study1_Raw.rds")
+write_csv(Study1_Raw, "Study1_Raw.csv")
 ```
