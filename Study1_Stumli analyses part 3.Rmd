@@ -1,0 +1,2150 @@
+---
+title: "Study1 - Part 3"
+author: "Helio"
+date: "21/07/2021"
+output: html_document
+---
+
+Code to work on
+
+
+Non Parametric Clustering of face Dynamics
+
+
+
+
+
+# create diferences between morph and original with each video id
+
+```{r}
+colnames(db_of7_new_2021)
+db_of7_new_2021_select<- select(db_of7_new_2021, c(1:8,120, 124, 126))
+
+unique(db_of7_new_2021_select$Emotion)
+db_of7_new_2021_select$Emotion2<- if_else(db_of7_new_2021_select$Emotion == "Joy",
+                                          "Happiness",
+                                          as.character(db_of7_new_2021_select$Emotion))
+
+
+unique(db_of7_new_2021_select$Emotion2)
+
+db_of7_new_2021_select$video_id<- tolower(paste0(db_of7_new_2021_select$face_unique, paste0(db_of7_new_2021_select$Emotion2,
+                                                  paste0(db_of7_new_2021_select$Dataset))))
+
+
+unique(db_of7_new_2021_select$video_id)
+# create differences between spati and speed
+
+testsubs<- subset(db_of7_new_2021_select, morph == "Morph")
+testsubs2<- subset(db_of7_new_2021_select, morph != "Morph")
+
+unique(testsubs$video_id)
+unique(testsubs2$video_id)
+nrow(db_of7_new_2021_select) #7680
+
+left_join(subset(db_of7_new_2021_select, morph == "Morph"),
+          subset(db_of7_new_2021_select, morph != "Morph"), by = c("video_id","Dataset"))
+
+colnames(testsubs)
+db_of7_new_2021_select_morph_isx<-left_join(testsubs,
+          testsubs2, by = c("video_id","Dataset", "timebin", "frame", "face_unique",
+                           "Emotion2"))
+
+# plot morph vs original differences in average face action and sped
+db_of7_new_2021_select_morph_isx %>%
+  mutate(morph_minus_original_avg_face_action = face_action_AVG2.x - 
+           face_action_AVG2.y)%>%
+  mutate(morph_minus_original_avg_speed = speed_face_action_AVG2.x -
+           speed_face_action_AVG2.y)%>%
+  ggplot(aes(timebin, morph_minus_original_avg_face_action, color = Emotion))+
+  geom_smooth(aes(group = video_id), se = F)+
+  facet_grid(~Dataset)
+
+
+
+# plot morph vs original differences in average face action and speed
+db_of7_new_2021_select_morph_isx %>%
+  mutate(morph_minus_original_avg_face_action = face_action_AVG2.x - 
+           face_action_AVG2.y)%>%
+  mutate(morph_minus_original_avg_speed = speed_face_action_AVG2.x -
+           speed_face_action_AVG2.y)%>%
+  ggplot(aes(timebin, morph_minus_original_avg_speed, color = Emotion))+
+  geom_smooth(aes(group = video_id), se = F)+
+  facet_grid(~Dataset)
+
+```
+
+# emotion
+
+
+```{r}
+
+db_of7_new_2021_select_morph_isx %>%
+  mutate(morph_minus_original_avg_face_action = face_action_AVG2.x - 
+           face_action_AVG2.y)%>%
+  mutate(morph_minus_original_avg_speed = speed_face_action_AVG2.x -
+           speed_face_action_AVG2.y)%>%
+  ggplot(aes(timebin, morph_minus_original_avg_face_action, color = Emotion))+
+  geom_smooth(aes(group = Emotion), se = F)+
+  facet_grid(~Dataset)
+
+F02_Anger_ADFES_Morph
+
+
+unique(db_of5$video)
+
+unique(db_of7_new$video)
+
+
+unique(db_of7_new_2021_select_morph_isx$filename.x)
+
+# create differences
+db_of7_new_2021_select_morph_isx<- db_of7_new_2021_select_morph_isx %>%
+  mutate(morph_minus_original_avg_face_action = face_action_AVG2.x - 
+           face_action_AVG2.y)%>%
+  mutate(morph_minus_original_avg_speed = speed_face_action_AVG2.x -
+           speed_face_action_AVG2.y)
+
+
+colnames(db_of7_new_2021_select_morph_isx)
+
+unique(db_of7_new_2021_select_morph_isx$Emotion)
+
+db_of7_new_2021_select_morph_isx_diff_avg <- db_of7_new_2021_select_morph_isx %>%
+  group_by(video_id, Emotion2, Dataset)%>%
+  # mutate(morph_minus_original_avg_face_action = mean(morph_minus_original_avg_face_action, 
+  #                                                    na.rm = TRUE),
+  #                                                    morph_minus_original_avg_speed = 
+  #          mean(morph_minus_original_avg_speed, na.rm = TRUE))%>%
+  summarise_at(c('morph_minus_original_avg_face_action','morph_minus_original_avg_speed'), 
+               mean, na.rm = TRUE)
+
+
+db_of7_new_2021_select_morph_isx_diff_avg$video_id
+
+db_ASC_NT$video_id <- tolower(db_ASC_NT$face_emotion_dataset)
+
+unique(db_ASC_NT$video_id)
+unique(db_of7_new_2021_select_morph_isx_diff_avg$video_id)
+colnames(db_ASC_NT$video)
+nrow(db_ASC_NT) # 12768 12,768
+
+
+
+db_of7_new_2021_select_morph_isx_diff_avg%>%
+  ggplot(aes(morph_minus_original_avg_face_action,
+             morph_minus_original_avg_speed))+
+  geom_point()
+
+
+# store the raw values for sped and face action averages
+db_of7_new_2021_select2<- select(db_of7_new_2021_select)
+unique(db_ASC_NT$Video)
+
+db_ASC_NT_2021$face_emotion_dataset_videotype<- tolower(paste0(db_ASC_NT_2021$face_emotion_dataset, paste0(db_ASC_NT$VideoType)))
+
+db_of7_new_2021_select$face_emotion_dataset_videotype<- tolower(paste0(db_of7_new_2021_select$video_id,
+                                                                paste0(db_of7_new_2021_select$morph)))
+unique(db_ASC_NT$face_emotion_dataset_videotype)
+unique(db_of7_new_2021_select$face_emotion_dataset_videotype)
+db_of7_new_2021_select$video
+
+
+
+
+```
+
+
+```{r}
+# compute similarity of stimuli and correlate with similarity of judements
+db_of7_new_2021_select
+db_of7_new_2021_gather_speed
+
+```
+
+
+
+```{r}
+
+# if we order each video by time and correlate we can actually see which videos are more different in their temporal dynamics
+
+db_of7_new_2021_select_original<- subset(db_of7_new_2021_select, morph == "Original")
+db_of7_new_2021_select_morph<- subset(db_of7_new_2021_select, morph != "Original")
+# unique()
+db_of7_new_2021_select_original<- db_of7_new_2021_select_original%>%
+  arrange(video_id, timebin)
+
+db_of7_new_2021_select_morph<- db_of7_new_2021_select_morph%>%
+  arrange(video_id, timebin)
+
+
+
+# x = original, y = morph
+db_of7_new_2021_select_origi_morph_cbind <- left_join(db_of7_new_2021_select_original,db_of7_new_2021_select_morph,
+          by = c('timebin','video_id', 'Dataset','Emotion2'))
+
+
+db_of7_new_2021_select_origi_morph_cbind%>%
+  group_by(video_id)%>%
+  mutate(face_action_correlation = cor.test(face_action_AVG2.x, face_action_AVG2.y, 
+                                            use = "complete")$estimate)%>%
+  mutate(face_speed_correlation = cor.test(speed_face_action_AVG2.x,
+                                           speed_face_action_AVG2.y,
+                                           use = 'complete.obs')$estimate)%>%
+  group_by(video_id, Dataset, Emotion2)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  ggplot(aes(Emotion2, face_action_correlation))+
+  geom_jitter()+
+  stat_summary(geom = 'pointrange', color = 'red', size = 1)+
+  facet_grid(~Dataset)
+
+install.packages("gghalves")
+library(gghalves)
+db_of7_new_2021_select_origi_morph_cbind%>%
+  group_by(video_id)%>%
+  mutate(face_action_correlation = cor.test(face_action_AVG2.x, face_action_AVG2.y, 
+                                            use = "complete")$estimate)%>%
+  # mutate(face_speed_correlation = cor.test(face_emotion_dataset_videotype.x,
+  #                                          face_emotion_dataset_videotype.y)$estimate)%>%
+  group_by(video_id, Dataset, Emotion2)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  ggplot(aes(Dataset, face_action_correlation, color = Dataset))+
+  geom_jitter()+
+      geom_half_violin(alpha = .3)+
+  stat_summary(geom = 'pointrange', color = 'red', size = 1)
+
+
+```
+
+
+```{r}
+  # facet_grid(~Dataset)+
+
+
+  
+db_of7_new_2021_select_origi_morph_cbind$speed_face_action_AVG2.x
+library(zoo)
+
+install.packages("forecast")
+forecast::na.interp(db_of7_new_2021_select_origi_morph_cbind$speed_face_action_AVG2.x)
+
+db_of7_new_2021_select_origi_morph_cbind%>%
+  group_by(video_id)%>%
+  mutate(approx = (speed_face_action_AVG2.x))
+
+db_of7_new_2021_select_origi_morph_cbind$speed_face_action_AVG2.x <- forecast::na.interp(db_of7_new_2021_select_origi_morph_cbind$speed_face_action_AVG2.x)
+
+db_of7_new_2021_select_origi_morph_cbind$speed_face_action_AVG2.y <- forecast::na.interp(db_of7_new_2021_select_origi_morph_cbind$speed_face_action_AVG2.y)
+
+
+
+db_of7_new_2021_select_origi_morph_cbind%>%
+  subset(video_id != "f02angeradfes")%>%
+  group_by(video_id)%>%
+ mutate(face_action_correlation = cor.test(face_action_AVG2.x, face_action_AVG2.y, 
+                                            use = "complete")$estimate)%>%
+  mutate(face_speed_correlation = cor.test(speed_face_action_AVG2.x,
+                                           speed_face_action_AVG2.y,
+                                           use = 'complete.obs')$estimate)%>%
+  group_by(video_id, Dataset, Emotion2)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  ggplot(aes(Dataset, face_speed_correlation, color = Emotion2))+
+  geom_jitter()+
+  stat_summary(geom = 'pointrange', color = 'red', size = 1)+
+  facet_grid(~Emotion2)
+
+
+
+# compute similarity
+db_of7_new_2021_select_origi_morph_cbind<- db_of7_new_2021_select_origi_morph_cbind%>%
+  group_by(video_id)%>%
+  mutate(face_action_correlation = cor.test(face_action_AVG2.x, face_action_AVG2.y, 
+                                            use = "complete")$estimate)%>%
+  mutate(face_speed_correlation = cor.test(speed_face_action_AVG2.x,
+                                           speed_face_action_AVG2.y,
+                                           use = 'complete.obs')$estimate)
+
+db_of7_new_2021_select_origi_morph_cbind_agg<-db_of7_new_2021_select_origi_morph_cbind%>%
+  group_by(video_id)%>%
+  summarise_at(c("face_action_correlation","face_speed_correlation"), mean, na.rm = TRUE)
+
+
+db_of7_new_2021_select_agg<- db_of7_new_2021_select %>%
+  group_by(face_emotion_dataset_videotype)%>%
+  summarise_at(c('face_action_AVG2','speed_face_action_AVG2'), mean, na.rm = TRUE)
+
+db_ASC_NT_2021<- left_join(db_ASC_NT_2021, db_of7_new_2021_select_agg,
+                           by = "face_emotion_dataset_videotype")
+
+# now merge on the study2 markdowns
+
+```
+
+
+```{r}
+db_of7_new %>%
+  group_by(Emotion,Dataset, morph,video)%>%
+  arrange( Emotion,Dataset, morph,video,timebin)%>%
+  mutate(face_action_AVG2 = face_action_AVG- mean(face_action_AVG[1:4], na.rm = TRUE))%>%
+  mutate(speed_face_action_AVG2 = abs(face_action_AVG2- lead(face_action_AVG2))/abs(timebin - lead(timebin)))%>%
+  mutate(speed_face_action_AVG = abs(face_action_AVG- lead(face_action_AVG))/abs(timebin - lead(timebin)))%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  subset(morph == "Morph")%>%
+  ggplot(aes(Emotion, speed_face_action_AVG2, colour = Emotion))+
+  
+  stat_summary(geom = 'pointrange', color = "black")+
+  # geom_boxplot()+
+  geom_jitter()+
+  facet_grid(morph~Dataset)+
+  xlab("Emotion")+
+  ylab("Average speed")+
+  p$graphstyle+
+  scale_color_brewer(palette = "Dark2")+
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.y = element_text(size = 20),
+        axis.title.x = element_text(size = 20),
+        legend.position = "top")
+
+
+db_of7_new %>%
+  group_by(Emotion,Dataset, morph,video)%>%
+  arrange( Emotion,Dataset, morph,video,timebin)%>%
+  mutate(face_action_AVG2 = face_action_AVG- mean(face_action_AVG[1:4], na.rm = TRUE))%>%
+  mutate(speed_face_action_AVG2 = abs(face_action_AVG2- lead(face_action_AVG2))/abs(timebin - lead(timebin)))%>%
+  mutate(speed_face_action_AVG = abs(face_action_AVG- lead(face_action_AVG))/abs(timebin - lead(timebin)))%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  subset(morph == "Original")%>%
+  ggplot(aes(Emotion, speed_face_action_AVG2, colour = Emotion))+
+  
+  stat_summary(geom = 'pointrange', color = "black")+
+  # geom_boxplot()+
+  geom_jitter()+
+  facet_grid(morph~Dataset)+
+  xlab("Emotion")+
+  ylab("Average speed")+
+  p$graphstyle+
+  scale_color_brewer(palette = "Dark2")+
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.y = element_text(size = 20),
+        axis.title.x = element_text(size = 20),
+        legend.position = "top")
+
+```
+
+
+
+
+
+
+
+Create a confusion matrix correlating emotions within actors on spatio-temporal dynamics, then average and see if it resembles the confusion matrix. Do his on The timeseries data
+
+We could use this to correlate two matrices, confusion matrix of participants
+
+Ordered by each pair, and confusions of stimuli correlations. We should expect a negative correlates.higher correlations in stim should make difficult go recognize emotions
+
+
+```{r}
+
+db_block<- db_ASC_NT_2021%>%
+  group_by(Video, Block, Dataset, VideoType, Emotion)%>%
+  summarise_at(c("Recognacc"), mean, na.rm = TRUE)
+
+unique(db_block$Block)
+  
+
+unique(db_of7_new$video)
+unique(db_block$Video)
+
+
+# first fo the whole stim set ignoring the blocks
+
+db_of7_new$Emotion
+
+
+library(reshape2)
+library(data.table)
+
+db_of7_new_2021_select$face_unique
+colnames(db_of7_new_2021_select)
+
+
+# move emotions o spearte columsn with values of face action average
+
+db_of7_new_2021_dcast_start<- dcast(setDT(db_of7_new_2021_select), timebin+face_unique+Dataset+morph ~Emotion2, 
+                              value.var = c("face_action_AVG2"), mean)%>%
+  arrange(face_unique, Dataset, morph, timebin)
+
+db_of7_new_2021_select$face_action_AVG2
+db_of7_new_2021_select$speed_face_action_AVG2
+
+cor.test(db_of7_new_2021_select$face_action_AVG2,
+         db_of7_new_2021_select$speed_face_action_AVG2, use = "complete")
+
+db_of7_new_2021_dcast_start_speed <- dcast(setDT(db_of7_new_2021_select), timebin+face_unique+Dataset+morph ~Emotion2, 
+                              value.var = c("speed_face_action_AVG2"), mean)%>%
+  arrange(face_unique, Dataset, morph, timebin)
+
+colnames(db_of7_new_2021_dcast_start_speed)
+
+db_of7_new_2021_dcast_start
+db_of7_new_2021_dcast_start_speed
+
+cor.test(db_of7_new_2021_dcast_start$Anger, 
+         db_of7_new_2021_dcast_start_speed$Anger)
+```
+
+
+
+
+```{r}
+
+# try making the correlation matrix within each face
+colnames(db_of7_new_2021_dcast)
+# db_of7_new_2021_dcast_test<- subset(db_of7_new_2021_dcast,
+#                                     Dataset == "ADFES" & morph == "Original")
+db_of7_new_2021_dcast <- db_of7_new_2021_dcast %>%
+  group_by(face_unique, Dataset, morph)%>%
+  do(data.frame(cor = t(cor(.[,5:10], .[,5:10]))))%>%
+  mutate(Emotion = c("Anger","Disgust","Fear","Happiness", "Sadness","Surprise"))
+  # # mutate(to = c("Anger","Disgust","Fear","Happiness", "Sadness","Surprise"))%>%
+  # ggplot(aes(From, to, fill))
+
+colnames(db_of7_new_2021_dcast_start_speed)
+db_of7_new_2021_dcast_speed <- db_of7_new_2021_dcast_start_speed %>%
+  group_by(face_unique, Dataset, morph)%>%
+  do(data.frame(cor = t(cor(.[,5:10], .[,5:10], use = 'complete'))))%>%
+  mutate(Emotion = c("Anger","Disgust","Fear","Happiness", "Sadness","Surprise"))
+db_of7_new_2021_dcast
+db_of7_new_2021_dcast_speed
+
+
+# now we need to gather the correlation
+
+colnames(db_of7_new_2021_dcast)
+?gather
+
+library(tidyr)
+
+# conusion based on face average action
+db_of7_new_2021_gather<- gather(db_of7_new_2021_dcast,
+                   key = "Prediction",
+                   value = "cor_acgf_face_action",
+                   -c(face_unique,Dataset, morph, Emotion))%>%
+  mutate(Prediction = substring(Prediction, 5,7))%>%
+  arrange(face_unique, Dataset, morph, Emotion, Prediction)
+
+# gather speed
+
+db_of7_new_2021_gather_speed <- gather(db_of7_new_2021_dcast_speed,
+                   key = "Prediction",
+                   value = "cor_avg_face_speed",
+                   -c(face_unique,Dataset, morph, Emotion))%>%
+  mutate(Prediction = substring(Prediction, 5,7))%>%
+  arrange(face_unique, Dataset, morph, Emotion, Prediction)
+
+db_of7_new_2021_gather$morph<- as.factor(db_of7_new_2021_gather$morph)
+db_of7_new_2021_gather$pair<- paste0(db_of7_new_2021_gather$Emotion, paste0(db_of7_new_2021_gather$Prediction))
+
+View(db_of7_new_2021_gather)
+
+db_of7_new_2021_gather_speed$pair<- paste0(
+db_of7_new_2021_gather_speed$Emotion, paste0(
+substr(db_of7_new_2021_gather_speed$Prediction, 1,3)))
+
+
+
+
+
+
+db_of7_new_2021_gather %>%
+  group_by(pair,Dataset, morph, Emotion, Prediction )%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  ggplot(aes(Emotion, Prediction))+
+  geom_raster(aes(fill = cor_acgf_face_action), stat = 'identity')+
+  facet_grid(Dataset~morph)+
+     p$graphstyle+
+  scale_fill_viridis_c(option = "plasma")
+  # geom_text(aes(label = round(cor_acgf_face_action,1)))
+
+# if_else(Digust to anger == NA, Fear to anger = NA, fear to disgust = NA, 
+
+# Happiness to = Anger = NA
+# Ha to Dis = NA
+# Ha to Fear = NA
+# Sadness to Anger = NA
+# Sad to disg = NA
+# sad to fea = NA 
+# Sad to hap = NA
+# sur to an = NA
+# surp to disg = NA
+# surp tofear = NA
+# surp to hap = NA
+# surp to SAD = NA
+# 
+# ) 
+
+db_of7_new_2021_gather_agg$lowerTritest<- if_else(db_of7_new_2021_gather_agg$Em2 == "Dis" 
+                & db_of7_new_2021_gather_agg$Prediction == "Ang", 
+        TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Fea" 
+                & db_of7_new_2021_gather_agg$Prediction == "Ang", 
+        TRUE,
+         if_else(db_of7_new_2021_gather_agg$Em2 == "Fea" 
+                 & db_of7_new_2021_gather_agg$Prediction == "Dis", 
+        TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Hap" 
+                & db_of7_new_2021_gather_agg$Prediction == "Ang",
+               TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Hap" 
+                & db_of7_new_2021_gather_agg$Prediction == "Dis",
+                TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Hap" 
+                & db_of7_new_2021_gather_agg$Prediction == "Fea",
+        TRUE,
+         if_else(db_of7_new_2021_gather_agg$Em2 == "Sad" 
+                 & db_of7_new_2021_gather_agg$Prediction == "Ang",
+        TRUE,
+         if_else(db_of7_new_2021_gather_agg$Em2 == "Sad" 
+                 & db_of7_new_2021_gather_agg$Prediction == "Dis",
+        TRUE,
+         if_else(db_of7_new_2021_gather_agg$Em2 == "Sad" 
+                 & db_of7_new_2021_gather_agg$Prediction == "Fea",
+        TRUE,
+         if_else(db_of7_new_2021_gather_agg$Em2 == "Sad" 
+                 & db_of7_new_2021_gather_agg$Prediction == "Hap",
+        TRUE,
+         if_else(db_of7_new_2021_gather_agg$Em2 == "Sur" 
+                 & db_of7_new_2021_gather_agg$Prediction == "Ang",
+        TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Sur" 
+                & db_of7_new_2021_gather_agg$Prediction == "Dis",
+        TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Sur" 
+                & db_of7_new_2021_gather_agg$Prediction == "Fea",
+        TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Sur" 
+                & db_of7_new_2021_gather_agg$Prediction == "Hap",
+        TRUE,
+        if_else(db_of7_new_2021_gather_agg$Em2 == "Sur" 
+                & db_of7_new_2021_gather_agg$Prediction == "Sad",
+        TRUE, FALSE)))))))))))))))
+
+
+db_of7_new_2021_gather_agg$cor_acgf_face_action2<- if_else(db_of7_new_2021_gather_agg$lowerTritest == FALSE, db_of7_new_2021_gather_agg$cor_acgf_face_action, NULL)
+
+
+db_of7_new_2021_gather_agg$Em3<- substring(db_of7_new_2021_gather_agg$Emotion, 1,2)
+db_of7_new_2021_gather_agg$pred3<- substring(db_of7_new_2021_gather_agg$Prediction, 1,2)
+
+range(db_of7_new_2021_gather_agg$cor_acgf_face_action2, na.rm = TRUE)
+
+Figure_matrix_faceaction<-
+
+db_of7_new_2021_gather_agg%>%
+  group_by(pair,Dataset, morph, Em3, pred3)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  ggplot(aes(Em3, pred3))+
+  geom_raster(aes(fill = cor_acgf_face_action2), stat = 'identity')+
+  facet_grid(Dataset~morph,
+             labeller = labeller(morph = db_of7_new$morph, Dataset = dataset_labs))+
+  theme_classic()+
+    p$graphstyle +
+  theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank(),
+        axis.title.y = element_blank())+
+  scale_fill_viridis_c(option = "D", na.value = "White",
+                       breaks = c(-1, 0, 1), limits = c(-1,1))
+  # coord_cartesian(xlim = c(0,1))
+  annotate("text", x = 4, y = 4, label = "R = .28")
+  
+  
+# Figure_matrix_faceaction+
+#    scale_fill_distiller(palette = "Dark2", type = "div")
+
+
+```
+
+```{r}
+ggsave("Figure_matrix_faceaction.tiff", Figure_matrix_faceaction, device = "tiff",
+       width = 10, height = 10)
+
+ggsave("Figure_matrix_faceaction.png", Figure_matrix_faceaction, device = "png",
+       width = 10, height = 10)
+
+  # plot_an
+  
+    # facet_grid(Dataset~morph,
+             # labeller = labeller(morph = db_of7_new$morph, Dataset = dataset_labs))+
+  # theme(legend.position = "none")
+
+# also correlate the matrices
+psych::fisherz2r(cortest_jeffe_original)
+cor.test(psych::fisherz2r(cortest_jeffe_original), psych::fisherz2r(cortest_ADFES_Original))
+lower.tri(cortest_jeffe_original)
+
+# removing half the triangle
+cortest_jeffe_original_uppertri <- cortest_jeffe_original[upper.tri(cortest_jeffe_original, diag = TRUE)]
+
+cortest_ADFES_Original[upper.tri(cortest_ADFES_Original,
+                                                          diag = TRUE)]
+
+
+cor.test(cortest_jeffe_original,
+         cortest_ADFES_Original)
+# 0.8367472
+
+cor.test(cortest_jeffe_original[upper.tri(cortest_jeffe_original, diag = TRUE)],
+         cortest_ADFES_Original[upper.tri(cortest_ADFES_Original, diag = TRUE)])
+
+# ADFES_Original[upper.tri(cortest_ADFES_Original, diag = TRUE)]
+# t = 8.0643, df = 19, p-value = 0.0000001488
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.7223455 0.9504550
+# sample estimates:
+#       cor 
+# 0.8797138 
+
+# no diagona;
+cor.test(psych::fisherz(cortest_jeffe_original[upper.tri(cortest_jeffe_original)]),
+        psych::fisherz( cortest_ADFES_Original[upper.tri(cortest_ADFES_Original)]))
+
+# Pearson's product-moment correlation
+# 
+# data:  psych::fisherz(cortest_jeffe_original[upper.tri(cortest_jeffe_original)]) and psych::fisherz(cortest_ADFES_Original[upper.tri(cortest_ADFES_Original)])
+# t = 3.0868, df = 13, p-value = 0.008665
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.2070593 0.8720758
+# sample estimates:
+#       cor 
+# 0.6503412 
+
+
+# ADFES vs JEFFE - Moprh
+
+# morph morph adfes jefefe
+cor.test(cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph)],
+         cortest_ADFES_Morph[upper.tri(cortest_ADFES_Morph)])
+
+# Pearson's product-moment correlation
+# 
+# data:  cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph)] and cortest_ADFES_Morph[upper.tri(cortest_ADFES_Morph)]
+# t = 1.8297, df = 13, p-value = 0.09032
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  -0.07776318  0.78322725
+# sample estimates:
+#       cor 
+# 0.4525261 
+
+
+cor.test(cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph, diag = TRUE)],
+         cortest_ADFES_Morph[upper.tri(cortest_ADFES_Morph, diag = TRUE)])
+
+# Pearson's product-moment correlation
+# 
+# data:  cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph, diag = TRUE)] and cortest_ADFES_Morph[upper.tri(cortest_ADFES_Morph, diag = TRUE)]
+# t = 5.7221, df = 19, p-value = 0.00001628
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.5540608 0.9134810
+# sample estimates:
+#       cor 
+# 0.7954833 
+
+
+
+# adfes morph vs original
+
+cor.test(psych::fisherz(cortest_ADFES_Morph[upper.tri(cortest_ADFES_Morph)]),
+         psych::fisherz(cortest_ADFES_Original[upper.tri(cortest_ADFES_Original)]))
+
+# 99, df = 13, p-value = 0.0000000002924
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.9340293 0.9929287
+# sample estimates:
+#       cor 
+# 0.9782367  
+
+
+cor.test(cortest_ADFES_Morph[upper.tri(cortest_ADFES_Morph, diag = TRUE)],
+         cortest_ADFES_Original[upper.tri(cortest_ADFES_Original,
+                                                         diag = TRUE)])
+
+
+
+# 	Pearson's product-moment correlation
+# 
+# data:  cortest_ADFES_Morph[upper.tri(cortest_ADFES_Morph, diag = TRUE)] and cortest_ADFES_Original[upper.tri(cortest_ADFES_Original, diag = TRUE)]
+# t = 30.407, df = 19, p-value < 0.00000000000000022
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.9747027 0.9959709
+# sample estimates:
+#      cor 
+# 0.989881 
+
+# JEFFE morph nd original
+
+cor.test(cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph)],
+         cortest_jeffe_original[upper.tri(cortest_jeffe_original)])
+
+# Pearson's product-moment correlation
+# 
+# data:  cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph)] and cortest_jeffe_original[upper.tri(cortest_jeffe_original)]
+# t = 3.266, df = 13, p-value = 0.006136
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.2424784 0.8807252
+# sample estimates:
+#      cor 
+# 0.671351 
+
+
+cor.test(cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph, diag = TRUE)],
+         cortest_jeffe_original[upper.tri(cortest_jeffe_original, diag = TRUE)])
+
+
+# data:  cortest_jeffe_Morph[upper.tri(cortest_jeffe_Morph, diag = TRUE)] and cortest_jeffe_original[upper.tri(cortest_jeffe_original, diag = TRUE)]
+# t = 11.793, df = 19, p-value = 0.0000000003474
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.8507873 0.9749114
+# sample estimates:
+#       cor 
+# 0.9379791
+
+ # including diagonal
+ # ADFES	Original	0.10637712	0.4882678
+ # ADFES	Morph	0.09366251	0.5921878
+ # EFFE	Original	0.14587464	0.3100338	
+ # JEFFE	Morph	0.10813477	0.4307224
+ 
+#  # no diagonal
+#  
+#  ADFES	Original	-0.07234746	0.28357492	
+# ADFES	Morph	-0.08760499	0.42906286	
+# JEFFE	Original	-0.02495044	0.03404737	
+# JEFFE	Morph	-0.07023828	0.20301130
+
+
+  
+```
+
+
+
+```{r}
+
+
+db_of7_new_2021_gather_speed %>%
+  group_by(pair,Dataset, morph, Emotion, Prediction )%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  # arrange(Emotion)%>%
+  # subset(row_number() >= which(Emotion == Prediction))%>%
+  ggplot(aes(Emotion, Prediction))+
+  geom_raster(aes(fill = cor_avg_face_speed), stat = 'identity')+
+  facet_grid(Dataset~morph)+
+     p$graphstyle+
+  scale_fill_viridis_c(option = "plasma")
+  geom_text(aes(label = round(cor_acgf_face_action,1)))
+  
+  # get metrics
+
+    
+ # cor.test(bind_rows(db_of7_new_2021,
+ #            db_of7_new_2021)$speed_face_action_AVG2, 
+ #          bind_rows(db_of7_new_2021,
+ #            db_of7_new_2021)$face_action_AVG2)
+ #  # binf_rows(db_of7_new_2021$speed_face_action_AVG2)
+ #  
+ # 
+ # 
+ #   
+ # cor.test(
+ #            db_of7_new_2021$speed_face_action_AVG2, 
+ #          
+ #            db_of7_new_2021$face_action_AVG2)
+```
+  
+ 
+  
+# sharevarianceProf
+
+```{r}
+  
+View(db_of7_new_2021_gather_agg)
+# db_of7_new_2021_gather%>%
+#   group_by(pair,Dataset, morph, Emotion, Prediction )%>%
+#   summarise_if(is.numeric, mean, na.rm = TRUE)
+db_of7_new_2021_gather_agg$Em2 <- substring(db_of7_new_2021_gather_agg$Emotion, 1,3)# 
+db_of7_new_2021_gather_agg$Em2
+
+db_of7_new_2021_gather_agg$pair_to1<- substr(db_of7_new_2021_gather_agg$Emotion, 1,3)
+db_of7_new_2021_gather_agg$pair_to2<- substr(db_of7_new_2021_gather_agg$Prediction, 1,3)
+
+db_of7_new_2021_gather_agg$pair2 <- paste0(db_of7_new_2021_gather_agg$Prediction,paste0(db_of7_new_2021_gather_agg$Em2)) 
+
+
+db_of7_new_2021_gather_agg$pair3 <- paste0(db_of7_new_2021_gather_agg$Em2,paste0(db_of7_new_2021_gather_agg$Prediction)) 
+
+
+duplicated(db_of7_new_2021_gather_agg$pair2)
+duplicated(db_of7_new_2021_gather_agg$pair_to1)
+
+db_of7_new_2021_gather_agg %>%
+  group_by(Dataset, morph)%>%
+  # subset(Dataset == "ADFES" & morph == "Original") %>%
+   # subset(duplicated(pair) == FALSE & duplicated(pair2) == FALSE)
+  # arrange(Dataset, morph,Emotion, Prediction)
+  subset(Em2!= Prediction) %>%
+  group_by(Dataset, morph)%>%
+  mutate(cor_acgf_face_action_var = cor_acgf_face_action2^2)%>%
+  summarise_at(c('cor_acgf_face_action','cor_acgf_face_action_var'), mean, na.rm = TRUE)
+  
+
+
+ sort(c(db_of7_new_2021_gather_agg$pair_to1, db_of7_new_2021_gather_agg$pair_to2))
+ 
+	
+
+```
+
+
+db_of7_new_2021_gather_agg <- db_of7_new_2021_gather%>%
+  group_by(pair,Dataset, morph, Emotion, Prediction )%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+View(db_of7_new_2021_gather)  
+
+```{r}
+
+# correlate dynamics between stimuli type and across datasets
+# between datasets
+
+# subset()
+  
+db_of7_new_2021_gather_agg$Emotion2<- substr(db_of7_new_2021_gather_agg$Emotion, 1,3)
+
+left_join(subset(db_of7_new_2021_gather_agg, Dataset == "ADFES"),
+          subset(db_of7_new_2021_gather_agg, Dataset != "ADFES"), 
+          by = c('morph', 'Emotion','Emotion2', 'Prediction', 'pair')) %>%
+  arrange(morph, pair, Emotion2, Prediction)%>%
+  ggplot(aes(cor_acgf_face_action.x, cor_acgf_face_action.y,
+             color = morph))+
+  geom_point()+
+  geom_smooth(se = F)+
+  ggpubr::stat_cor()+
+  facet_grid(~morph)+
+  ggtitle("between dataset face action correlation")
+
+# no diagnonal
+
+left_join(subset(db_of7_new_2021_gather_agg, Dataset == "ADFES"),
+          subset(db_of7_new_2021_gather_agg, Dataset != "ADFES"), 
+          by = c('morph', 'Emotion','Emotion2', 'Prediction', 'pair')) %>%
+  arrange(morph, pair, Emotion2, Prediction)%>%
+  subset(Emotion2!= Prediction)%>%
+  ggplot(aes(psych::fisherz(cor_acgf_face_action.x), psych::fisherz(cor_acgf_face_action.y),
+             color = morph))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+  facet_grid(~morph)+
+  ggtitle("between dataset face action correlation - no diagonal")
+
+
+# based on speed
+# conusion based on face average action
+db_of7_new_2021_gather_speed<- gather(db_of7_new_2021_dcast_start,
+                   key = "Prediction",
+                   value = "cor_acgf_face_action",
+                   -c(face_unique,Dataset, morph, Emotion))%>%
+  mutate(Prediction = substring(Prediction, 5,7))%>%
+  arrange(face_unique, Dataset, morph, Emotion, Prediction)
+
+db_of7_new_2021_gather$morph<- as.factor(db_of7_new_2021_gather$morph)
+db_of7_new_2021_gather$pair<- paste0(db_of7_new_2021_gather$Emotion, paste0(db_of7_new_2021_gather$Prediction))
+
+db_of7_new_2021_gather%>%
+  group_by(pair,Dataset, morph, Emotion, Prediction )%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  ggplot(aes(Emotion, Prediction))+
+  geom_raster(aes(fill = cor_acgf_face_action), stat = 'identity')+
+  facet_grid(Dataset~morph)+
+     p$graphstyle+
+  scale_fill_viridis_c(option = "plasma")+
+  geom_text(aes(label = round(cor_acgf_face_action,1)))
+
+
+```
+
+
+
+
+# between stimuli type
+```{r}
+left_join(subset(db_of7_new_2021_gather_agg, morph == "Original"),
+          subset(db_of7_new_2021_gather_agg, morph != "Original"), 
+          by = c('Dataset', 'Emotion','Emotion2', 'Prediction', 'pair')) %>%
+  arrange(Dataset, pair, Emotion2, Prediction)%>%
+  # subset(Emotion2!= Prediction)%>%
+  ggplot(aes(psych::fisherz(cor_acgf_face_action.x), psych::fisherz(cor_acgf_face_action.y),
+             color = Dataset))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+  facet_grid(~Dataset)+
+  ggtitle("between stimulus type face action correlation")
+
+# no diagnional
+left_join(subset(db_of7_new_2021_gather_agg, morph == "Original"),
+          subset(db_of7_new_2021_gather_agg, morph != "Original"), 
+          by = c('Dataset', 'Emotion','Emotion2', 'Prediction', 'pair')) %>%
+  arrange(Dataset, pair, Emotion2, Prediction)%>%
+  subset(Emotion2!= Prediction)%>%
+  ggplot(aes(psych::fisherz(cor_acgf_face_action.x), psych::fisherz(cor_acgf_face_action.y),
+             color = Dataset))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+  facet_grid(~Dataset)+
+  ggtitle("between stimulus type face action correlation - no diagonal")
+
+```
+
+
+# between stimuli dataset differences are more important
+
+
+
+# Now import the dataset conufusion data
+
+```{r}
+
+library(readr)
+confusion_byds_NT_full <- read_csv("confusion_byds_NT_full.csv")
+View(confusion_byds_NT_full)
+
+unique(confusion_byds_NT_full$Participant)
+
+
+# start with globalface action correlations with gloabl confusions
+colnames(confusion_byds_NT_full)
+
+confusion_byds_NT_full$pair = paste0(confusion_byds_NT_full$Emotion,
+                                     paste0(confusion_byds_NT_full$Prediction))
+
+unique(confusion_byds_NT_full$Prediction)
+unique(confusion_byds_NT_full$Emotion)
+
+# we don't want neutral for this
+
+confusion_byds_NT_full_noneutral<- subset(confusion_byds_NT_full,
+                                          Emotion!= "Neutral" &
+                                            Prediction != "Neutral")
+
+unique(confusion_byds_NT_full_noneutral$Prediction)
+unique(confusion_byds_NT_full_noneutral$Emotion)
+
+confusion_byds_NT_full_noneutral_agg<- confusion_byds_NT_full_noneutral%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+
+
+```
+
+compare matrices of behavior and action
+```{r}
+
+
+confusion_global <-  confusion_byds_NT_full_noneutral_agg%>%
+  ggplot(aes(Emotion, Prediction))+
+  geom_tile(aes(fill = Freq), stat = "identity")+
+  p$graphstyle+
+  scale_fill_viridis_c(option = "plasma")
+  
+cor_matrix_faceaction<- db_of7_new_2021_gather%>%
+  group_by(pair,Emotion, Prediction )%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  ggplot(aes(Emotion, Prediction))+
+  geom_raster(aes(fill = cor_acgf_face_action), stat = 'identity')+
+  # facet_grid(Dataset~morph)+
+     p$graphstyle+
+  scale_fill_viridis_c(option = "plasma")
+  # geom_text(aes(label = round(cor_acgf_face_action,1)))
+confusion_global+cor_matrix_faceaction
+
+
+#  now correlate
+
+```
+
+
+```{r}
+
+# order first
+
+confusion_byds_NT_full_noneutral_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_agg$Prediction, 1,3)
+
+confusion_byds_NT_full_noneutral_agg$pair<- paste0(confusion_byds_NT_full_noneutral_agg$Emotion, confusion_byds_NT_full_noneutral_agg$Prediction2)
+# db_of7_new_2021_gather$pair
+
+confusion_byds_NT_full_noneutral_agg
+
+db_of7_new_2021_gather_agg_all<- db_of7_new_2021_gather_agg%>%
+  group_by(pair, Emotion, Prediction)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  arrange(pair, Emotion, Prediction)
+
+
+db_of7_new_2021_gather_agg <- db_of7_new_2021_gather_agg %>%
+  group_by(pair, Dataset,morph, Emotion, Prediction)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  arrange(Dataset,morph, pair,Emotion,Prediction)
+```
+
+
+```{r}
+db_of7_new_2021_gather_agg_all
+
+confusion_byds_NT_full_noneutral_agg<- confusion_byds_NT_full_noneutral_agg%>%
+ arrange(pair, Emotion, Prediction)
+
+
+confusion_byds_NT_full_noneutral$morph<- confusion_byds_NT_full_noneutral$VideoType
+confusion_byds_NT_full_noneutral$Dataset<- confusion_byds_NT_full_noneutral$DATASET
+
+# agg across participants
+confusion_byds_NT_full_noneutral_agg_acrosspp<- confusion_byds_NT_full_noneutral %>%
+  group_by(pair, Dataset,morph, Emotion, Prediction)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
+  arrange(Dataset,morph, pair,Emotion,Prediction)
+
+
+```
+  
+
+# plot all
+
+```{r}
+left_join(confusion_byds_NT_full_noneutral_agg, db_of7_new_2021_gather_agg_all, by = c("pair"))%>%
+  subset(Emotion.x != Prediction.x)%>%
+  ggplot(aes(psych::fisherz(cor_acgf_face_action), Freq))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle("Similariy of face action by confusion frequncy across all")
+
+
+# split by datasets
+
+confusion_byds_NT_full_noneutral_agg_acrosspp$Pred2<- substr(confusion_byds_NT_full_noneutral_agg_acrosspp$Prediction, 1,3)
+confusion_byds_NT_full_noneutral_agg_acrosspp$pair<- paste0(confusion_byds_NT_full_noneutral_agg_acrosspp$Emotion, confusion_byds_NT_full_noneutral_agg_acrosspp$Pred2)
+
+
+unique(confusion_byds_NT_full_noneutral_agg_acrosspp$Emotion)
+unique(confusion_byds_NT_full_noneutral_agg_acrosspp$pair)
+
+unique(db_of7_new_2021_gather_agg$pair)
+unique(db_of7_new_2021_gather_agg$Dataset)
+unique(confusion_byds_NT_full_noneutral_agg_acrosspp$Dataset)
+
+unique(db_of7_new_2021_gather_agg$morph)
+unique(confusion_byds_NT_full_noneutral_agg_acrosspp$morph)
+confusion_byds_NT_full_noneutral_agg_acrosspp$morph<- as.factor(confusion_byds_NT_full_noneutral_agg_acrosspp$morph)
+
+range(confusion_byds_NT_full_noneutral_agg_acrosspp$Freq)
+left_join(confusion_byds_NT_full_noneutral_agg_acrosspp, db_of7_new_2021_gather_agg, by = c("pair", "Dataset", "morph"))%>%
+  mutate(same_dif = if_else(Emotion.x == Prediction.x, "same", "diff"))%>%
+  subset(Emotion.x != Prediction.x)%>%
+  ggplot(aes(cor_acgf_face_action, Freq))+
+  geom_point(aes(color = same_dif))+
+  geom_smooth( se = F)+
+  ggpubr::stat_cor()+
+  # ylab("Confusion")+
+  # xlab("Correlation face action")+
+  ggtitle("Similariy of face action by confusion frequncy across all - no diagn")+
+  facet_grid(morph~Dataset)
+
+
+
+# between datasets
+
+# do the same across face unique
+
+db_of7_new_2021_gather
+
+# compute the correlation for face action differntly
+
+
+```
+
+
+```{r}
+
+unique(db_of7_new_2021_dcast_start$Dataset)
+
+db_of7_new_2021_dcast_start %>%
+  group_by(Emotion)
+# db_of7_new_2021_dcast
+cortest <- cor(db_of7_new_2021_dcast_start [,5:10])
+
+ggcorrplot::ggcorrplot(cortest)+
+  p$graphstyle+
+  scale_fill_viridis_c(option = "plasma", breaks = c(-1, 0, 1), limits = c(-1,1))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+cor_matrix_faceaction
+```
+
+
+```{r}
+# cortest[lower.tri(cortest,diag=TRUE)]=NA # put NA
+# move emotions o spearte columsn with values of face action average
+library(data.table)
+db_of7_new_2021_dcast_start<- dcast(setDT(db_of7_new_2021_select), timebin+face_unique+Dataset+morph ~Emotion2, 
+                              value.var = c("face_action_AVG2"), mean)%>%
+  arrange(face_unique, Dataset, morph, timebin)
+
+
+db_of7_new_2021_dcast_start_agg<- db_of7_new_2021_dcast_start %>%
+  group_by(timebin)%>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+  
+db_of7_new_2021_dcast_start_agg
+
+db_of7_new_2021_dcast_start_agg
+```
+
+
+```{r}
+cortest <- cor(db_of7_new_2021_dcast_start [,5:10])
+cortest<-as.data.frame(as.table(cortest)) # as a dataframe
+cortest
+cortest<-na.omit(cortest) # remove NA
+cortest
+cor.test_acrossall <-cortest[with(cortest, order(-Freq)), ] 
+cor.test_acrossall <- cor.test_acrossall %>%
+  arrange(Var1, Var2)
+
+cor.test_acrossall 
+
+
+cor.test_acrossall$Emotion<- cor.test_acrossall$Var1
+
+cor.test_acrossall$Pred2 <-substr( cor.test_acrossall$Var2,1,3)
+
+cor.test_acrossall$pair<- paste0(cor.test_acrossall$Emotion,paste0(cor.test_acrossall$Pred2))
+# now merge with confusion
+
+
+confusion_byds_NT_full_noneutral_agg$pair
+cor.test_acrossall$pair
+confusion_byds_NT_full_noneutral_agg$Pred2<- confusion_byds_NT_full_noneutral_agg$Prediction2
+
+cor.test_acrossall$Cor<-cor.test_acrossall$Freq
+cor.test_acrossall$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_agg$pair<- as.factor(confusion_byds_NT_full_noneutral_agg$pair)
+cor.test_acrossall$pair<-as.factor(cor.test_acrossall$pair)
+
+confusion_byds_NT_full_noneutral_agg<- confusion_byds_NT_full_noneutral_agg%>%
+  arrange(pair)
+
+cor.test_acrossall$pair
+cor.test_acrossall<- cor.test_acrossall%>%
+  arrange(pair)
+
+
+
+
+
+```
+
+
+
+
+
+Confusion dynmaics by confusion decision across all
+
+
+```{r}
+full_join(confusion_byds_NT_full_noneutral_agg, cor.test_acrossall,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+ ggplot(aes(psych::fisherz(Cor), log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Prediction2))+
+  geom_smooth(span = 1, se = F)+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle("Similariy of face action by confusion frequncy across all")
+
+# across sets check
+
+# compute witin an stim
+left_join(confusion_byds_NT_full_noneutral_agg, db_of7_new_2021_gather_agg_all, by = c("pair"))%>%
+  subset(Emotion.x != Prediction.x)%>%
+  ggplot(aes(psych::fisherz(cor_acgf_face_action), Freq))+
+  # ggplot(aes(psych::fisherz(Cor), log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Pred2))+
+  geom_smooth(span = 1, se = F)+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle("Similariy of face action by confusion frequncy across all")
+
+
+```
+
+
+
+
+aggregate across identities
+
+```{r}
+
+cortest_acrossid <- cor(db_of7_new_2021_dcast_start_agg [,2:7])
+cortest_acrossid<-as.data.frame(as.table(cortest_acrossid)) # as a dataframe
+cortest_acrossid
+cortest_acrossid<-na.omit(cortest_acrossid) # remove NA
+cortest_acrossid
+cor.test_acrossallid <-cortest_acrossid[with(cortest_acrossid, order(-Freq)), ] 
+cor.test_acrossallid <- cor.test_acrossallid %>%
+  arrange(Var1, Var2)
+
+cor.test_acrossallid 
+
+
+cor.test_acrossallid$Emotion<- cor.test_acrossallid$Var1
+
+cor.test_acrossallid$Pred2 <-substr( cor.test_acrossallid$Var2,1,3)
+
+cor.test_acrossallid$pair<- paste0(cor.test_acrossallid$Emotion,paste0(cor.test_acrossallid$Pred2))
+# now merge with confusion
+
+
+confusion_byds_NT_full_noneutral_agg$pair
+cor.test_acrossallid$pair
+confusion_byds_NT_full_noneutral_agg$Pred2<- confusion_byds_NT_full_noneutral_agg$Prediction2
+
+cor.test_acrossallid$Cor<-cor.test_acrossallid$Freq
+cor.test_acrossallid$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_agg$pair<- as.factor(confusion_byds_NT_full_noneutral_agg$pair)
+
+cor.test_acrossallid$pair<-as.factor(cor.test_acrossallid$pair)
+
+confusion_byds_NT_full_noneutral_agg<- confusion_byds_NT_full_noneutral_agg%>%
+  arrange(pair)
+
+cor.test_acrossallid$pair
+cor.test_acrossallid<- cor.test_acrossallid%>%
+  arrange(pair)
+
+# Confusion dynmaics by confusion decision across all
+
+right_join(confusion_byds_NT_full_noneutral_agg, cor.test_acrossallid,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+ ggplot(aes(psych::fisherz(Cor), log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Prediction2))+
+  geom_smooth(span = 1, se = F)+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle("Similariy of face action by confusion frequncy across all")
+
+# across sets check
+
+# compute witin an stim
+left_join(confusion_byds_NT_full_noneutral_agg, db_of7_new_2021_gather_agg_all, by = c("pair"))%>%
+  subset(Emotion.x != Prediction.x)%>%
+  ggplot(aes(psych::fisherz(cor_acgf_face_action), Freq))+
+  # ggplot(aes(psych::fisherz(Cor), log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Pred2))+
+  geom_smooth(span = 1, se = F)+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle("Similariy of face action by confusion frequncy across all")
+
+
+
+
+
+```
+
+# JEFFE original
+```{r}
+subset(db_of7_new_2021_dcast, Dataset == "JEFFE" & morph == "Original")[,5:10]
+cortest_jeffe_original <- cor((subset(db_of7_new_2021_dcast_start, Dataset == "JEFFE" & morph == "Original")[,5:10]))
+
+cortest_jeffe_original 
+
+cortest_jeffe_original_df <-as.data.frame(as.table(cortest_jeffe_original)) # as a dataframe
+cortest_jeffe_original_df 
+cortest_jeffe_original_df <-na.omit(cortest_jeffe_original_df ) # remove NA
+cortest_jeffe_original_df 
+
+cortest_jeffe_original_df  <-cortest_jeffe_original_df[with(cortest_jeffe_original_df , order(-Freq)), ] 
+cortest_jeffe_original_df  <- cortest_jeffe_original_df  %>%
+  arrange(Var1, Var2)
+
+
+cortest_jeffe_original_df $Emotion<- cortest_jeffe_original_df $Var1
+
+cortest_jeffe_original_df $Pred2 <-substr( cortest_jeffe_original_df $Var2,1,3)
+
+cortest_jeffe_original_df $pair<- paste0(cortest_jeffe_original_df $Emotion,paste0(cortest_jeffe_original_df$Pred2))
+
+
+# now merge with confusion
+unique(confusion_byds_NT_full_noneutral$VideoType)
+confusion_byds_NT_full_noneutral_JEFEE<- subset(confusion_byds_NT_full_noneutral,
+                                                VideoType == "Original"&
+                                                Dataset == "JEFFE")
+
+
+confusion_byds_NT_full_noneutral_JEFEE_agg<-
+confusion_byds_NT_full_noneutral_JEFEE%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+confusion_byds_NT_full_noneutral_JEFEE_agg$pair
+
+
+confusion_byds_NT_full_noneutral_JEFEE_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_JEFEE_agg$Prediction, 1,3)
+
+
+cortest_jeffe_original_df$Cor<-cortest_jeffe_original_df$Freq
+cortest_jeffe_original_df$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_JEFEE_agg$pair <- as.factor(confusion_byds_NT_full_noneutral_JEFEE_agg$pair)
+
+cortest_jeffe_original_df$pair<-as.factor(cortest_jeffe_original_df$pair)
+
+confusion_byds_NT_full_noneutral_JEFEE_agg$pair<- paste0(confusion_byds_NT_full_noneutral_JEFEE_agg$Emotion, paste0(confusion_byds_NT_full_noneutral_JEFEE_agg$Prediction2))
+
+confusion_byds_NT_full_noneutral_JEFEE_agg<- confusion_byds_NT_full_noneutral_JEFEE_agg%>%
+  arrange(pair)
+
+
+cortest_jeffe_original_df<- cortest_jeffe_original_df%>%
+  arrange(pair)
+
+confusion_byds_NT_full_noneutral_JEFEE_agg
+
+test_jeffe_cong_cor<- left_join(confusion_byds_NT_full_noneutral_JEFEE_agg, cortest_jeffe_original_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)
+
+cor.test(test_jeffe_cong_cor$Freq, psych::fisherz(test_jeffe_cong_cor$Cor))
+# 0.3699105
+test_jeffe_cong_cor2<- left_join(confusion_byds_NT_full_noneutral_JEFEE_agg, cortest_jeffe_original_df,
+         by = c("pair"))
+  # subset(Emotion.x != Prediction)
+
+cor.test(test_jeffe_cong_cor2$Freq, test_jeffe_cong_cor2$Cor, use = 'complete')
+
+# 0.828027
+
+jeffe_orig_stim_rec_matrix<- left_join(confusion_byds_NT_full_noneutral_JEFEE_agg, cortest_jeffe_original_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+  mutate(Emotion = Emotion.x, Prediction = Prediction)%>%
+  ggplot(aes(Cor, Freq))+
+  geom_point(aes(color = Emotion, shape = Prediction), size = 3)+
+  # geom_smooth(method = 'lm', se = F, size = 2, color = "gray30", alpha = .6)+
+ stat_smooth( geom = "line", method = 'lm', se = F, size = 2, color = "gray30", alpha = .6)+
+  # ggpubr::stat_cor()+
+  ylab("Average confusion frequency")+
+  xlab("Face action similarity")+
+  theme_classic()+
+  p$graphstyle1+
+  scale_color_brewer(palette = "Dark2")+
+  # scale_y_continuous(breaks = c(0,.5,1), limits = c(0,1))+
+  # scale_x_continuous(breaks = c(-.6,-.1,.4), limits = c(-.6,.4))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  
+  # ggtitle(" JEFEE Similarity of face action by confusion frequncy across all")
+
+jeffe_orig_stim_rec_matrix
+
+
+```
+
+So the confusion patterns reflect the corrleation between stim dynamics on JEFFE across morph and origonals
+
+JEFFE = Morph
+```{r}
+
+subset(db_of7_new_2021_dcast, Dataset == "JEFFE" & morph == "Morph")[,5:10]
+cortest_jeffe_Morph <- cor((subset(db_of7_new_2021_dcast_start, Dataset == "JEFFE" & morph == "Morph")[,5:10]))
+
+cortest_jeffe_Morph 
+
+cortest_jeffe_Morph_df <-as.data.frame(as.table(cortest_jeffe_Morph)) # as a dataframe
+cortest_jeffe_Morph_df 
+cortest_jeffe_Morph_df <-na.omit(cortest_jeffe_Morph_df ) # remove NA
+cortest_jeffe_Morph_df 
+
+cortest_jeffe_Morph_df  <-cortest_jeffe_Morph_df[with(cortest_jeffe_Morph_df , order(-Freq)), ] 
+cortest_jeffe_Morph_df  <- cortest_jeffe_Morph_df  %>%
+  arrange(Var1, Var2)
+
+
+cortest_jeffe_Morph_df $Emotion<- cortest_jeffe_Morph_df $Var1
+
+cortest_jeffe_Morph_df $Pred2 <-substr( cortest_jeffe_Morph_df $Var2,1,3)
+
+cortest_jeffe_Morph_df $pair<- paste0(cortest_jeffe_Morph_df $Emotion,paste0(cortest_jeffe_Morph_df$Pred2))
+
+
+# now merge with confusion
+confusion_byds_NT_full_noneutral_JEFEE_morph<- subset(confusion_byds_NT_full_noneutral,
+                                                Dataset == "JEFFE" & VideoType == "Morph")
+
+
+confusion_byds_NT_full_noneutral_JEFEE_morph_agg<-
+confusion_byds_NT_full_noneutral_JEFEE_morph%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+confusion_byds_NT_full_noneutral_JEFEE_morph_agg$pair
+
+
+confusion_byds_NT_full_noneutral_JEFEE_morph_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_JEFEE_morph_agg$Prediction, 1,3)
+
+
+cortest_jeffe_Morph_df$Cor<-cortest_jeffe_Morph_df$Freq
+cortest_jeffe_Morph_df$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_JEFEE_morph_agg$pair <- as.factor(confusion_byds_NT_full_noneutral_JEFEE_morph_agg$pair)
+
+cortest_jeffe_Morph_df$pair<-as.factor(cortest_jeffe_Morph_df$pair)
+
+confusion_byds_NT_full_noneutral_JEFEE_morph_agg$pair<- paste0(confusion_byds_NT_full_noneutral_JEFEE_morph_agg$Emotion, paste0(confusion_byds_NT_full_noneutral_JEFEE_morph_agg$Prediction2))
+
+confusion_byds_NT_full_noneutral_JEFEE_morph_agg<- confusion_byds_NT_full_noneutral_JEFEE_morph_agg%>%
+  arrange(pair)
+
+
+cortest_jeffe_Morph_df<- cortest_jeffe_Morph_df%>%
+  arrange(pair)
+
+confusion_byds_NT_full_noneutral_JEFEE_morph_agg
+
+test_jeffemorph_cong_cor<- left_join(confusion_byds_NT_full_noneutral_JEFEE_morph_agg, cortest_jeffe_Morph_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)
+
+cor.test(test_jeffemorph_cong_cor$Freq, psych::fisherz(test_jeffemorph_cong_cor$Cor))
+# 0.079652
+
+test_jeffemorph_cong_cor2<- left_join(confusion_byds_NT_full_noneutral_JEFEE_morph_agg, cortest_jeffe_Morph_df,
+         by = c("pair"))
+  # subset(Emotion.x != Prediction)
+
+cor.test(test_jeffemorph_cong_cor2$Freq, test_jeffemorph_cong_cor2$Cor, use = 'complete')
+# 0.7266827 
+
+
+keffe_morph_stim_recogn_matrix <- left_join(confusion_byds_NT_full_noneutral_JEFEE_morph_agg, cortest_jeffe_Morph_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+  mutate(Emotion = Emotion.x, Prediction = Prediction)%>%
+  ggplot(aes(Cor, Freq))+
+  geom_point(aes(color = Emotion, shape = Prediction, size = 3))+
+ stat_smooth( geom = "line", method = 'lm', se = F, size = 2, color = "gray30", alpha = .6)+
+  # ggpubr::stat_cor()+
+  ylab("Average confusion frequency")+
+  xlab("Face action similarity")+
+  theme_classic()+
+  p$graphstyle1+
+  scale_color_brewer(palette = "Dark2")+
+  # scale_y_continuous(breaks = c(0,.4,.8), limits = c(0,.8))+
+  #  scale_x_continuous(breaks = c(-.5,-.1,.7), limits = c(-.5,.7))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+  # ggtitle(" JEFEE morph Similarity of face action by confusion frequncy across all")
+
+
+
+keffe_morph_stim_recogn_matrix
+
+```
+
+
+
+
+ADFES morph
+
+```{r}
+subset(db_of7_new_2021_dcast, Dataset == "ADFES" & morph == "Morph")[,5:10]
+cortest_ADFES_Morph <- cor((subset(db_of7_new_2021_dcast_start, Dataset == "ADFES" & morph == "Morph")[,5:10]))
+
+cortest_ADFES_Morph 
+
+cortest_ADFES_Morph_df <-as.data.frame(as.table(cortest_ADFES_Morph)) # as a dataframe
+cortest_ADFES_Morph_df 
+cortest_ADFES_Morph_df <-na.omit(cortest_ADFES_Morph_df ) # remove NA
+cortest_ADFES_Morph_df 
+
+cortest_ADFES_Morph_df  <-cortest_ADFES_Morph_df[with(cortest_ADFES_Morph_df , order(-Freq)), ] 
+cortest_ADFES_Morph_df  <- cortest_ADFES_Morph_df  %>%
+  arrange(Var1, Var2)
+
+
+cortest_ADFES_Morph_df $Emotion<- cortest_ADFES_Morph_df $Var1
+
+cortest_ADFES_Morph_df $Pred2 <-substr( cortest_ADFES_Morph_df $Var2,1,3)
+
+cortest_ADFES_Morph_df $pair<- paste0(cortest_ADFES_Morph_df $Emotion,paste0(cortest_ADFES_Morph_df$Pred2))
+
+
+# now merge with confusion
+confusion_byds_NT_full_noneutral_ADFES_morph<- subset(confusion_byds_NT_full_noneutral,
+                                                Dataset == "ADFES" & VideoType == "Morph")
+
+
+confusion_byds_NT_full_noneutral_ADFES_morph_agg<-
+confusion_byds_NT_full_noneutral_ADFES_morph%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+confusion_byds_NT_full_noneutral_ADFES_morph_agg$pair
+
+
+confusion_byds_NT_full_noneutral_ADFES_morph_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_ADFES_morph_agg$Prediction, 1,3)
+
+
+cortest_ADFES_Morph_df$Cor<-cortest_ADFES_Morph_df$Freq
+cortest_ADFES_Morph_df$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_ADFES_morph_agg$pair <- as.factor(confusion_byds_NT_full_noneutral_ADFES_morph_agg$pair)
+
+cortest_ADFES_Morph_df$pair<-as.factor(cortest_ADFES_Morph_df$pair)
+
+confusion_byds_NT_full_noneutral_ADFES_morph_agg$pair<- paste0(confusion_byds_NT_full_noneutral_ADFES_morph_agg$Emotion, paste0(confusion_byds_NT_full_noneutral_ADFES_morph_agg$Prediction2))
+
+confusion_byds_NT_full_noneutral_ADFES_morph_agg<- confusion_byds_NT_full_noneutral_ADFES_morph_agg%>%
+  arrange(pair)
+
+
+cortest_ADFES_Morph_df<- cortest_ADFES_Morph_df%>%
+  arrange(pair)
+
+confusion_byds_NT_full_noneutral_ADFES_morph_agg
+
+test_ADFESmorph_cong_cor<- left_join(confusion_byds_NT_full_noneutral_ADFES_morph_agg, cortest_ADFES_Morph_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)
+
+cor.test(test_ADFESmorph_cong_cor$Freq, psych::fisherz(test_ADFESmorph_cong_cor$Cor))
+# 0.4494001 
+# t = 2.662, df = 28, p-value = 0.01272
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.1063493 0.6968464
+# sample estimates:
+#       cor 
+# 0.4494001 
+test_ADFESmorph_cong_cor2<- left_join(confusion_byds_NT_full_noneutral_ADFES_morph_agg, cortest_ADFES_Morph_df,
+         by = c("pair"))
+  # subset(Emotion.x != Prediction)
+
+
+cor.test(test_ADFESmorph_cong_cor2$Freq, test_ADFESmorph_cong_cor2$Cor, use = 'complete')
+# 0.6729624 
+
+
+adfes_morph_matrix_stim_recogn<- left_join(confusion_byds_NT_full_noneutral_ADFES_morph_agg, cortest_ADFES_Morph_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%  mutate(Emotion = Emotion.x, Prediction = Prediction)%>%
+  ggplot(aes(Cor, Freq))+
+  geom_point(aes(color = Emotion, shape = Prediction), size = 3)+
+stat_smooth( geom = "line", method = 'lm', se = F, size = 2, color = "gray30", alpha = .6)+
+  # ggpubr::stat_cor()+
+  ylab("Average confusion frequency")+
+  xlab("Face action similarity")+
+  theme_classic()+
+  p$graphstyle1+
+  scale_color_brewer(palette = "Dark2")+
+  # scale_y_continuous(breaks = c(0,.4, .8), limits = c(0,.8))+
+  #  scale_x_continuous(breaks = c(-.6,-.1,.5))+
+  ggtitle("Morph")+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  # ggtitle(" ADFES morph Similarity of face action by confusion frequncy across all")
+
+adfes_morph_matrix_stim_recogn
+
+```
+
+
+ADFES original
+
+```{r}
+subset(db_of7_new_2021_dcast, Dataset == "ADFES" & Original == "Original")[,5:10]
+cortest_ADFES_Original <- cor((subset(db_of7_new_2021_dcast_start, Dataset == "ADFES" & morph== "Original")[,5:10]))
+
+cortest_ADFES_Original 
+
+cortest_ADFES_Original_df <-as.data.frame(as.table(cortest_ADFES_Original)) # as a dataframe
+cortest_ADFES_Original_df 
+cortest_ADFES_Original_df <-na.omit(cortest_ADFES_Original_df ) # remove NA
+cortest_ADFES_Original_df 
+
+cortest_ADFES_Original_df  <-cortest_ADFES_Original_df[with(cortest_ADFES_Original_df , order(-Freq)), ] 
+cortest_ADFES_Original_df  <- cortest_ADFES_Original_df  %>%
+  arrange(Var1, Var2)
+
+
+cortest_ADFES_Original_df $Emotion<- cortest_ADFES_Original_df $Var1
+
+cortest_ADFES_Original_df $Pred2 <-substr( cortest_ADFES_Original_df $Var2,1,3)
+
+cortest_ADFES_Original_df $pair<- paste0(cortest_ADFES_Original_df $Emotion,paste0(cortest_ADFES_Original_df$Pred2))
+
+
+# now merge with confusion
+confusion_byds_NT_full_noneutral_ADFES_Original<- subset(confusion_byds_NT_full_noneutral,
+                                                Dataset == "ADFES" & VideoType == "Original")
+
+
+confusion_byds_NT_full_noneutral_ADFES_Original_agg<-
+confusion_byds_NT_full_noneutral_ADFES_Original%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+confusion_byds_NT_full_noneutral_ADFES_Original_agg$pair
+
+
+confusion_byds_NT_full_noneutral_ADFES_Original_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_ADFES_Original_agg$Prediction, 1,3)
+
+
+cortest_ADFES_Original_df$Cor<-cortest_ADFES_Original_df$Freq
+cortest_ADFES_Original_df$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_ADFES_Original_agg$pair <- as.factor(confusion_byds_NT_full_noneutral_ADFES_Original_agg$pair)
+
+cortest_ADFES_Original_df$pair<-as.factor(cortest_ADFES_Original_df$pair)
+
+confusion_byds_NT_full_noneutral_ADFES_Original_agg$pair<- paste0(confusion_byds_NT_full_noneutral_ADFES_Original_agg$Emotion, paste0(confusion_byds_NT_full_noneutral_ADFES_Original_agg$Prediction2))
+
+confusion_byds_NT_full_noneutral_ADFES_Original_agg<- confusion_byds_NT_full_noneutral_ADFES_Original_agg%>%
+  arrange(pair)
+
+
+cortest_ADFES_Original_df<- cortest_ADFES_Original_df%>%
+  arrange(pair)
+
+confusion_byds_NT_full_noneutral_ADFES_Original_agg
+
+test_ADFESOriginal_cong_cor<- left_join(confusion_byds_NT_full_noneutral_ADFES_Original_agg, cortest_ADFES_Original_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)
+
+cor.test(test_ADFESOriginal_cong_cor$Freq, psych::fisherz(test_ADFESOriginal_cong_cor$Cor))
+# 0.4083305
+# t = 2.367, df = 28, p-value = 0.02508
+# alternative hypothesis: true correlation is not equal to 0
+# 95 percent confidence interval:
+#  0.05635107 0.67003207
+# sample estimates:
+#       cor 
+# 0.4083305 
+
+test_ADFESOriginal_cong_cor2<- left_join(confusion_byds_NT_full_noneutral_ADFES_Original_agg, cortest_ADFES_Original_df,
+         by = c("pair"))
+  # subset(Emotion.x != Prediction)
+
+
+cor.test(test_ADFESOriginal_cong_cor2$Freq, test_ADFESOriginal_cong_cor2$Cor, use = 'complete')
+# 0.704836 
+
+
+adfes_orig_matrix_stim_recogn<- left_join(confusion_byds_NT_full_noneutral_ADFES_Original_agg, cortest_ADFES_Original_df,
+         by = c("pair"))%>%
+   subset(Emotion.x != Prediction)%>%  mutate(Emotion = Emotion.x, Prediction = Prediction)%>%
+  ggplot(aes(Cor, Freq))+
+  geom_point(aes(color = Emotion, shape = Prediction), size = 3)+
+  # geom_smooth(method = 'lm', se = F)+
+ stat_smooth( geom = "line", method = 'lm', se = F, size = 2, color = "gray30", alpha = .6)+
+  # ggpubr::stat_cor()+
+  ylab("Average confusion frequency")+
+  xlab("Face action similarity")+
+  theme_classic()+
+  p$graphstyle1+
+  scale_color_brewer(palette = "Dark2")+
+  # scale_y_continuous(breaks = c(0,.5, 1), limits = c(0,1))+
+   # scale_x_continuous(breaks = c(-.5,0,.5), limits = c(-.6, .55))+
+  ggtitle("Original")
+  # theme(axist)
+
+adfes_orig_matrix_stim_recogn
+```
+
+
+```{r}
+
+  # ggtitle(" ADFES morph Similarity of face action by confusion frequncy across all")
+  
+  
+  # ggtitle(" ADFES Original Similarity of face action by confusion frequncy across all")
+  
+  adfes_orig_matrix_stim_recogn
+  adfes_morph_matrix_stim_recogn
+  
+jeffe_orig_stim_rec_matrix<- jeffe_orig_stim_rec_matrix+theme(legend.position = "none")
+
+keffe_morph_stim_recogn_matrix<- keffe_morph_stim_recogn_matrix+theme(legend.position = "none")
+
+library(patchwork)
+adfes_morph_matrix_stim_recogn <- adfes_morph_matrix_stim_recogn+theme(legend.position = "none")
+
+
+panel_cor_matrix_recogn_stim <-  ((adfes_orig_matrix_stim_recogn+  adfes_morph_matrix_stim_recogn)/
+    (jeffe_orig_stim_rec_matrix + keffe_morph_stim_recogn_matrix))+theme(legend.position = "top")
+  
+panel_cor_matrix_recogn_stim <-  panel_cor_matrix_recogn_stim +   plot_annotation(tag_levels = "A")
+
+panel_cor_matrix_recogn_stim
+
+ggsave("panel_cor_matrix_recogn_stim.tiff",panel_cor_matrix_recogn_stim, device= "tiff",
+       width = 10, height = 10, dpi = 900)
+
+ggsave("panel_cor_matrix_recogn_stim.png",panel_cor_matrix_recogn_stim, device= "png",
+       width = 12, height = 12, dpi = 900)
+
+```
+
+
+speed adfes origiinal correlate stim confusion with decision congusions
+
+
+```{r}
+db_of7_new_2021_dcast_start_speed
+db_of7_new_2021_dcast_start_speed
+# subset(db_of7_new_2021_dcast, Dataset == "ADFES" & Original == "Original")[,5:10]
+cortest_ADFES_Original_speed <- cor((subset(db_of7_new_2021_dcast_start_speed, Dataset == "ADFES" & morph== "Original")[,5:10]), use = "complete")
+
+cortest_ADFES_Original_speed
+
+cortest_ADFES_Original_speed
+
+cortest_ADFES_Original
+
+cor(c(cortest_ADFES_Original), c(cortest_ADFES_Original_speed))
+
+```
+
+```{r}
+cortest_ADFES_Original_speed_df <-as.data.frame(as.table(cortest_ADFES_Original_speed)) # as a dataframe
+cortest_ADFES_Original_speed_df 
+cortest_ADFES_Original_speed_df <-na.omit(cortest_ADFES_Original_speed_df ) # remove NA
+cortest_ADFES_Original_speed_df 
+
+cortest_ADFES_Original_speed_df  <- cortest_ADFES_Original_speed_df[with(cortest_ADFES_Original_speed_df , order(-Freq)), ] 
+cortest_ADFES_Original_speed_df  <- cortest_ADFES_Original_speed_df  %>%
+  arrange(Var1, Var2)
+
+
+cortest_ADFES_Original_speed_df $Emotion<- cortest_ADFES_Original_speed_df $Var1
+
+cortest_ADFES_Original_speed_df $Pred2 <-substr( cortest_ADFES_Original_speed_df $Var2,1,3)
+
+cortest_ADFES_Original_speed_df $pair<- paste0(cortest_ADFES_Original_speed_df $Emotion,paste0(cortest_ADFES_Original_speed_df$Pred2))
+
+
+# now merge with confusion
+confusion_byds_NT_full_noneutral_ADFES_Original_speed <- subset(confusion_byds_NT_full_noneutral,
+                                                Dataset == "ADFES" & VideoType == "Original")
+
+
+confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg<-
+confusion_byds_NT_full_noneutral_ADFES_Original_speed%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$pair
+
+
+confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$Prediction, 1,3)
+
+# store correlation
+# cortest_ADFES_Original_speed
+cortest_ADFES_Original_speed_df $Cor <-cortest_ADFES_Original_speed_df$Freq
+cortest_ADFES_Original_speed_df$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$pair <- as.factor(confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$pair)
+
+cortest_ADFES_Original_speed_df$pair<-as.factor(cortest_ADFES_Original_speed_df$pair)
+
+confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$pair<- paste0(confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$Emotion, paste0(confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg$Prediction2))
+
+confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg<- confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg%>%
+  arrange(pair)
+
+
+cortest_ADFES_Original_speed_df <- cortest_ADFES_Original_speed_df%>%
+  arrange(pair)
+
+confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg
+
+# View(cortest_ADFES_Original_df)
+# View(cortest_ADFES_Original_speed_df)
+
+test_ADFESOriginal_cong_cor_speed<- left_join(confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg,
+                                              cortest_ADFES_Original_speed_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)
+
+cor.test(test_ADFESOriginal_cong_cor_speed$Freq, psych::fisherz(test_ADFESOriginal_cong_cor_speed$Cor))
+# 0.1492799 
+
+test_ADFESOriginal_cong_cor2_speed<- left_join(confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg, cortest_ADFES_Original_speed_df,
+         by = c("pair"))
+  # subset(Emotion.x != Prediction)
+
+
+cor.test(test_ADFESOriginal_cong_cor2_speed$Freq, test_ADFESOriginal_cong_cor2_speed$Cor, use = 'complete')
+# 0.7372679  
+
+
+
+
+left_join(confusion_byds_NT_full_noneutral_ADFES_Original_speed_agg, cortest_ADFES_Original_speed_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+  ggplot(aes(x = psych::fisherz(Cor), y = log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Pred2))+
+ geom_smooth(span = .8, se = F)+
+   # geom_smooth(method = lm, se = F, formula = y ~ s(x))+
+  # stat_smooth(method = lm, formula = y ~ splines(x,df = 2))+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle(" ADFES Original Similarity of face action by confusion frequncy across all")
+
+
+
+left_join(confusion_byds_NT_full_noneutral_ADFES_Original_agg, cortest_ADFES_Original_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+  ggplot(aes(x = psych::fisherz(Cor), y = log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Pred2))+
+ geom_smooth(method = lm, span = .8, se = F)+
+   # geom_smooth(method = lm, se = F, formula = y ~ s(x))+
+  # stat_smooth(method = lm, formula = y ~ splines(x,df = 2))+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle(" ADFES Original Similarity of face action by confusion frequncy across all")
+
+
+```
+ADFES morph s[peed
+
+```{r}
+# subset(db_of7_new_2021_dcast, Dataset == "ADFES" & Original == "Original")[,5:10]
+cortest_ADFES_Morph_speed <- cor((subset(db_of7_new_2021_dcast_start_speed, Dataset == "ADFES" & morph== "Morph")[,5:10]), use = "complete")
+cortest_ADFES_Morph_speed_df <-as.data.frame(as.table(cortest_ADFES_Morph_speed)) # as a dataframe
+cortest_ADFES_Morph_speed_df 
+cortest_ADFES_Morph_speed_df <-na.omit(cortest_ADFES_Morph_speed_df ) # remove NA
+cortest_ADFES_Morph_speed_df 
+
+cortest_ADFES_Morph_speed_df  <- cortest_ADFES_Morph_speed_df[with(cortest_ADFES_Morph_speed_df , order(-Freq)), ] 
+cortest_ADFES_Morph_speed_df  <- cortest_ADFES_Morph_speed_df  %>%
+  arrange(Var1, Var2)
+
+
+cortest_ADFES_Morph_speed_df $Emotion<- cortest_ADFES_Morph_speed_df $Var1
+
+cortest_ADFES_Morph_speed_df $Pred2 <-substr( cortest_ADFES_Morph_speed_df $Var2,1,3)
+
+cortest_ADFES_Morph_speed_df $pair<- paste0(cortest_ADFES_Morph_speed_df $Emotion,paste0(cortest_ADFES_Morph_speed_df$Pred2))
+
+
+# now merge with confusion
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed <- subset(confusion_byds_NT_full_noneutral,
+                                                Dataset == "ADFES" & VideoType == "Morph")
+
+
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg<-
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$pair
+
+
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$Prediction, 1,3)
+
+# store correlation
+# cortest_ADFES_Morph_speed
+cortest_ADFES_Morph_speed_df $Cor <-cortest_ADFES_Morph_speed_df$Freq
+cortest_ADFES_Morph_speed_df$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$pair <- as.factor(confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$pair)
+
+cortest_ADFES_Morph_speed_df$pair<-as.factor(cortest_ADFES_Morph_speed_df$pair)
+
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$pair<- paste0(confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$Emotion, paste0(confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg$Prediction2))
+
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg<- confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg%>%
+  arrange(pair)
+
+
+cortest_ADFES_Morph_speed_df <- cortest_ADFES_Morph_speed_df%>%
+  arrange(pair)
+
+confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg
+
+# View(cortest_ADFES_Morph_df)
+# View(cortest_ADFES_Morph_speed_df)
+
+test_ADFESMorph_cong_cor_speed<- left_join(confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg,
+                                              cortest_ADFES_Morph_speed_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)
+
+cor.test(test_ADFESMorph_cong_cor_speed$Freq, psych::fisherz(test_ADFESMorph_cong_cor_speed$Cor))
+# -0.123361 
+
+test_ADFESMorph_cong_cor2_speed<- left_join(confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg, cortest_ADFES_Morph_speed_df,
+         by = c("pair"))
+  # subset(Emotion.x != Prediction)
+
+
+cor.test(test_ADFESMorph_cong_cor2_speed$Freq, test_ADFESMorph_cong_cor2_speed$Cor, use = 'complete')
+# 0.956807  
+
+
+
+
+left_join(confusion_byds_NT_full_noneutral_ADFES_Morph_speed_agg, cortest_ADFES_Morph_speed_df,
+         by = c("pair"))%>%
+  # subset(Emotion.x != Prediction)%>%
+  ggplot(aes(x = psych::fisherz(Cor), y = log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Pred2))+
+ geom_smooth(method = lm, span = .8, se = F)+
+   # geom_smooth(method = lm, se = F, formula = y ~ s(x))+
+  # stat_smooth(method = lm, formula = y ~ splines(x,df = 2))+
+  ggpubr::stat_cor(use = "complete")+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle(" ADFES Morph Similarity of face action by confusion frequncy across all")
+
+
+
+
+
+```
+
+
+
+JEFFE speed - original
+
+```{r}
+db_of7_new_2021_dcast_start_speed
+db_of7_new_2021_dcast_start_speed
+# subset(db_of7_new_2021_dcast, Dataset == "JEFFE" & Original == "Original")[,5:10]
+cortest_JEFFE_Original_speed <- cor((subset(db_of7_new_2021_dcast_start_speed, Dataset == "JEFFE" & morph== "Original")[,5:10]), use = "complete")
+
+cortest_JEFFE_Original_speed
+
+cortest_JEFFE_Original_speed
+
+
+
+```
+
+
+
+```{r}
+cortest_JEFFE_Original_speed_df <-as.data.frame(as.table(cortest_JEFFE_Original_speed)) # as a dataframe
+cortest_JEFFE_Original_speed_df 
+cortest_JEFFE_Original_speed_df <-na.omit(cortest_JEFFE_Original_speed_df ) # remove NA
+cortest_JEFFE_Original_speed_df 
+
+cortest_JEFFE_Original_speed_df  <- cortest_JEFFE_Original_speed_df[with(cortest_JEFFE_Original_speed_df , order(-Freq)), ] 
+cortest_JEFFE_Original_speed_df  <- cortest_JEFFE_Original_speed_df  %>%
+  arrange(Var1, Var2)
+
+
+cortest_JEFFE_Original_speed_df $Emotion<- cortest_JEFFE_Original_speed_df $Var1
+
+cortest_JEFFE_Original_speed_df $Pred2 <-substr( cortest_JEFFE_Original_speed_df $Var2,1,3)
+
+cortest_JEFFE_Original_speed_df $pair<- paste0(cortest_JEFFE_Original_speed_df $Emotion,paste0(cortest_JEFFE_Original_speed_df$Pred2))
+
+
+# now merge with confusion
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed <- subset(confusion_byds_NT_full_noneutral,
+                                                Dataset == "JEFFE" & VideoType == "Original")
+
+
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg<-
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed%>%
+  group_by(pair, Emotion, Prediction)%>%
+    summarise_if(is.numeric, mean, na.rm = TRUE)
+
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$pair
+
+
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$Prediction2<- substr(confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$Prediction, 1,3)
+
+# store correlation
+# cortest_JEFFE_Original_speed
+cortest_JEFFE_Original_speed_df $Cor <-cortest_JEFFE_Original_speed_df$Freq
+cortest_JEFFE_Original_speed_df$Freq<-NULL
+
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$pair <- as.factor(confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$pair)
+
+cortest_JEFFE_Original_speed_df$pair<-as.factor(cortest_JEFFE_Original_speed_df$pair)
+
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$pair<- paste0(confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$Emotion, paste0(confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg$Prediction2))
+
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg<- confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg%>%
+  arrange(pair)
+
+
+cortest_JEFFE_Original_speed_df <- cortest_JEFFE_Original_speed_df%>%
+  arrange(pair)
+
+confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg
+
+# View(cortest_JEFFE_Original_df)
+# View(cortest_JEFFE_Original_speed_df)
+
+test_JEFFEOriginal_cong_cor_speed<- left_join(confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg,
+                                              cortest_JEFFE_Original_speed_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)
+
+cor.test(test_JEFFEOriginal_cong_cor_speed$Freq, psych::fisherz(test_JEFFEOriginal_cong_cor_speed$Cor))
+# -0.03707467 
+
+test_JEFFEOriginal_cong_cor2_speed<- left_join(confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg, cortest_JEFFE_Original_speed_df,
+         by = c("pair"))
+  # subset(Emotion.x != Prediction)
+
+
+cor.test(test_JEFFEOriginal_cong_cor2_speed$Freq, test_JEFFEOriginal_cong_cor2_speed$Cor, use = 'complete')
+# 0.8937639  
+
+
+
+
+left_join(confusion_byds_NT_full_noneutral_JEFFE_Original_speed_agg, cortest_JEFFE_Original_speed_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+  ggplot(aes(x = psych::fisherz(Cor), y = log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Pred2))+
+ geom_smooth(span = .8, se = F)+
+   # geom_smooth(method = lm, se = F, formula = y ~ s(x))+
+  # stat_smooth(method = lm, formula = y ~ splines(x,df = 2))+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle(" JEFFE Original Similarity of face action by confusion frequncy across all")
+
+
+
+left_join(confusion_byds_NT_full_noneutral_JEFFE_Original_agg, cortest_JEFFE_Original_df,
+         by = c("pair"))%>%
+  subset(Emotion.x != Prediction)%>%
+  ggplot(aes(x = psych::fisherz(Cor), y = log1p(Freq+.1)))+
+  geom_point(aes(color = Emotion.x, shape = Pred2))+
+ geom_smooth(method = lm, span = .8, se = F)+
+   # geom_smooth(method = lm, se = F, formula = y ~ s(x))+
+  # stat_smooth(method = lm, formula = y ~ splines(x,df = 2))+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle(" JEFFE Original Similarity of face action by confusion frequncy across all")
+
+
+
+
+```
+
+
+
+
+# across sets check
+
+# compute witin an stim
+left_join(confusion_byds_NT_full_noneutral_JEFEE, db_of7_new_2021_gather_agg_all, by = c("pair"))%>%
+  # subset(Emotion.x != Prediction.x)%>%
+  ggplot(aes(psych::fisherz(cor_acgf_face_action), Freq))+
+  geom_point()+
+  geom_smooth(se = F)+
+  ggpubr::stat_cor()+
+  ylab("Confusion")+
+  xlab("Correlation face action")+
+  ggtitle("Similariy of face action by confusion frequncy across all")
+
+
+
+
+
+```
+
+# export a matrix for all
+db_of7_new_2021_dcast 
+
+cortest <- cor(db_of7_new_2021_dcast[,5:10])
+
+# transform into a to from dataset
+
+cortest_df<-as.data.frame(as.table(cortest)) # as a dataframe
+cortest_df
+# cortest_df<-na.omit(cortest_df) # remove NA
+cortest
+rmat.test<-cortest_df[with(cortest_df, order(-Freq)), ] 
+rmat.test<- rmat.test%>%
+  arrange(Var1, Var2)
+
+rmat.test
+
+write.csv(rmat.test, "cortest_df_all.csv")
+
+
+```
+
+speed doesn' show disticnt correlations
+```{r}
+cortest2<- cor(db_of7_new_2021_dcast[,11:16], use = 'complete')
+
+ggcorrplot::ggcorrplot(cortest2)+
+  p$graphstyle+
+  scale_fill_viridis_c(option = "plasma", breaks = c(-1, 0, 1), limits = c(-1,1))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+
+db_of_adfes_cor<- subset(db_of7_new_2021_dcast, Dataset != "ADFES" & 
+                           morph == "Original")
+
+cortest_adfes<- cor(db_of_adfes_cor[,5:10])
+  
+t(cortest_adfes)
+cortest_adfes^2
+ggcorrplot::ggcorrplot(cortest_adfes)+
+  p$graphstyle+
+  scale_fill_viridis_c(option = "plasma", breaks = c(-1, 0, 1), limits = c(-1,1))+
+  # scale_fill_viridis_c(option = "plasma", breaks = c(0, 1), limits = c(0,1))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
