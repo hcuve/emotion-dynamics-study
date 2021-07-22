@@ -8,6 +8,15 @@ output: html_document
 "remove some unnecessary duplicates
 
 
+
+```{r}
+db_ASC_NT, db_ASC_NT$Group == "NT"
+
+
+
+```
+
+
 ```{r}
 rm(a_valence, a_valence1, acc_from_stimdiff, w,x,z,timebin_ADFES_avg_Anger, timebin_avg_Anger, timebin_avg_Disgust, timebin_avg_Fear, timebin_avg_Joy, timebin_avg_Sadness, timebin_avg_Surprise, timebin_JEFFE_avg_Anger, timebinout_avg_JEFFE, timebinout_avg_ADFES, timebin_shuff_Surprise, timebin_shuff_Sadness, timebin_shuff_JEFFE_Surprise, timebin_shuff_JEFFE_Joy, timebin_JEFFE_avg_Fear)
 
@@ -70,8 +79,7 @@ library(emmeans)
 ```
 
 
-Predicting emotion ratings
-
+# Predicting emotion ratings
 
 
 lmer model on valence
@@ -5958,6 +5966,7 @@ db_NT_lmer_correlation_merged3<-  db_NT_lmer_correlation_merged%>%
   mutate(RT_recogn = cor(ReactionTime_Recognition.x, ReactionTime_Recognition.y))
 
 View(db_NT_lmer_correlation_merged3)
+
 
 
 
