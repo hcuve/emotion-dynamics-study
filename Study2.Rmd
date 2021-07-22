@@ -5,34 +5,26 @@ date: "16/07/2020"
 output: html_document
 ---
 
-"remove some unnecessary duplicates
 
 load("D:/OneDrive - Nexus365/Face Morph Paper/Data/Study2_plots.RData"
 
+# there is chaos and there there is my organisation method
+
 ```{r}
-db_ASC_NT, db_ASC_NT$Group == "NT"
-
 colnames(db_ASC_NT)
-
 db_ASC_NT$Participant<- db_ASC_NT$ParticipantPrivateID
 
-
- lmer(AnswerRating_Valence ~ 1 + DATASET + Emotion+
-                                    Emotion*DATASET+(1| ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_ASC_NT, db_ASC_NT$Group == "NT"))
 study2<- db_ASC_NT%>%
   subset(Group == "NT")%>%
   select(c(90,24,3:10,15,33,37, stim_id, Actor_ID))
-
 saveRDS(study2, "study2.rds")
-
 write_csv(study2, "study2.csv")
-
 ```
 
+"remove some unnecessary duplicates
 
-```{r}
+
+```{r eval=FALSE, include=FALSE}
 rm(a_valence, a_valence1, acc_from_stimdiff, w,x,z,timebin_ADFES_avg_Anger, timebin_avg_Anger, timebin_avg_Disgust, timebin_avg_Fear, timebin_avg_Joy, timebin_avg_Sadness, timebin_avg_Surprise, timebin_JEFFE_avg_Anger, timebinout_avg_JEFFE, timebinout_avg_ADFES, timebin_shuff_Surprise, timebin_shuff_Sadness, timebin_shuff_JEFFE_Surprise, timebin_shuff_JEFFE_Joy, timebin_JEFFE_avg_Fear)
 
 rm(timebin_random, timebin_random_ADFES, timebin_JEFFE_avg_Disgust, timebin_JEFFE_avg_Joy, timebin_JEFFE_avg_Surprise)
@@ -69,13 +61,10 @@ rm(db_of7_new_tomerge,db_of7_new_tomerge1, fuckup)
 
 rm(timestamp_ADFES_avg_Anger, timestamp_ADFES_avg_Joy, timestamp_ADFES_avg_Sadness, timestamp_ADFES_avg_Surprise, timestamp_ADFES_Disgust, timestamp_ADFES_Fear, timestamp_ADFES_avg_Surprise, timestamp_ADFES_Surprise, timestamp_JEFFE_Surprise)
 
-
 rm(timebinout, timebinout_avg, timestamp_ADFES_Joy, timestamp_JEFFE_Sadness, timestamp_avg_Disgust, timestamp_avg_Joy, timestamp_avg_Sadness, timestamp_JEFFE_Anger, timestamp_JEFFE_avg_Surprise)
 rm(simulated_clusters_JEFFE_Anger, simulated_clusters_JEFFE_Disgust, simulated_clusters_JEFFE_Joy, simulated_clusters_JEFFE_Surprise, summarytest, summarytest_avg, summarytest_avg_ADFES, summarytest_avg_JEFFE)
-
 rm(simulated_clusters_JEFFE_Fear, simulated_clusters_Joy, simulated_clusters_Sadness, simulated_clusters_Surprise)
 rm(test.data_by_ADFES_avg_Joy, test.data_by_ADFES_avg_Sadness, test.data_by_avg_Anger, test.data_by_avg_Disgust, test.data_by_avg_Fear, test.data_by_avg_Fear, test.data_by_avg_Joy, test.data_by_avg_Sadness, test.data_by_avg_Surprise, testresults_avg_cluster_random, test.data_byADFESFear)
-
 rm(testresults, testresults_ADFES, testresults_ADFES_Anger, testresults_ADFES_avg_Disgust, testresults_ADFES_avg_Joy)
 ```
 
@@ -83,49 +72,56 @@ Run proposed analyses
 
 GLMMS
 
-
+necessary packages
 ```{r}
 library(afex)
 library(lmerTest)
 library(broom.mixed)
 library(tidyverse)
 library(emmeans)
+library(sjmisc)
+library(sjPlot) 
+library(sjstats)
+library(psycho)
 
 ```
 
-
 # Predicting emotion ratings
-
 
 lmer model on valence
 ```{r}
 unique(db_ASC_NT$Video)
 unique(substr(db_ASC_NT$Video, 1,3))
+
 db_ASC_NT$Actor_ID<- as.factor(substr(db_ASC_NT$Video, 1,3))
 unique(db_ASC_NT$Actor_ID)
 str(db_ASC_NT)
+
+
 db_ASC_NT$ParticipantPrivateID<- as.factor(db_ASC_NT$ParticipantPrivateID)
 db_ASC_NT$Emotion<- as.factor(db_ASC_NT$Emotion)
 db_ASC_NT$DATASET<- as.factor(db_ASC_NT$DATASET)
 db_ASC_NT$VideoType<- as.factor(db_ASC_NT$VideoType)
 
+# paper_analyses<- list()
+
 paper_analyses$lmer_NT_val<- lmer(AnswerRating_Valence ~ 1 + VideoType + DATASET + Emotion+
                                     VideoType*Emotion*DATASET+(1| ParticipantPrivateID) + (1 | Video),
                                   REML = FALSE,
                                     data = subset(db_ASC_NT, db_ASC_NT$Group == "NT"))
-library(sjmisc)
-library(sjPlot) 
-library(sjstats)
-?analyze
-library(psycho)
+
 paper_analyses$lmer_NT_val_analyze <- analyze (paper_analyses$lmer_NT_val, CI = 95, effsize_rules = "cohen1988")
+
+# plot(paper_analyses$lmer_NT_val)
+# qqnorm(resid(paper_analyses$lmer_NT_val))
+# qqline(resid(paper_analyses$lmer_NT_val))
+
+tab_model(paper_analyses$lmer_NT_val)
 
 paper_analyses$lmer_NT_val_novt<- lmer(AnswerRating_Valence ~ 1 + DATASET + Emotion+
                                     Emotion*DATASET+(1| ParticipantPrivateID) + (1 | Video),
                                   REML = FALSE,
                                     data = subset(db_ASC_NT, db_ASC_NT$Group == "NT"))
-
-tab_model(paper_analyses$lmer_NT_val)
 
 paper_analyses$lmer_NT_val1 <- lmer(AnswerRating_Valence ~ 1 + DATASET + Emotion+
                                     VideoType*Emotion+
@@ -139,11 +135,9 @@ paper_analyses$lmer_NT_val1 <- lmer(AnswerRating_Valence ~ 1 + DATASET + Emotion
 
 ```
 
-
-
-
-```{r}
 # control for Actor ID instead
+```{r}
+
 paper_analyses$lmer_NT_val1_actID<- lmer(AnswerRating_Valence ~ 1 + DATASET + Emotion+
                                     VideoType*DATASET*Emotion+
                                     # DATASET*Emotion+
@@ -159,7 +153,7 @@ step(paper_analyses$lmer_NT_val)
 
 std_beta(paper_analyses$lmer_NT_val)
 
-# check if logarithim tranformatio improves residuals
+# check if logarithmic tranformation improves residuals
 paper_analyses$lmer_NT_val1_log<- lmer(log1p(AnswerRating_Valence+.1) ~ 1 + DATASET + Emotion+
                                     VideoType*Emotion+
                                     DATASET*Emotion+
@@ -168,7 +162,7 @@ paper_analyses$lmer_NT_val1_log<- lmer(log1p(AnswerRating_Valence+.1) ~ 1 + DATA
                                   REML = FALSE,
                                     data = subset(db_ASC_NT, db_ASC_NT$Group == "NT")) 
 
-# the vriance explained by actor ID is way less
+# the variance explained by actor ID is way less
 # it doesn't
 library(sjPlot)
 library(sjmisc)
@@ -199,7 +193,7 @@ emmeans(paper_analyses$lmer_NT_val1, pairwise ~ VideoType*Emotion, adjust = "non
 emmeans(paper_analyses$lmer_NT_val1, pairwise ~ Emotion, adjust = "bonf")
 # all pairs differ except anger disgust, fear sadness, and nger sadness
 
-# DATSET
+# DATASET
 library(emmeans)
 paper_analyses$lmer_NT_val_DS<- emmeans(paper_analyses$lmer_NT_val, pairwise~ DATASET, adjust = "none")
 # <- eff_size(emmeans(paper_analyses$lmer_NT_val, pairwise ~ DATASET, adjust = "none"))
@@ -224,211 +218,18 @@ std_beta(paper_analyses$lmer_NT_val, ci.lvl = 0.95)
 library(MuMIn)
 r.squaredGLMM(paper_analyses$lmer_NT_val)
 r.squaredGLMM(paper_analyses$lmer_NT_val_novt) #videotype makes a very small contribution
-# less than one percent
-
-
-Q <- quantile(db_NT_lmer$ReactionTime_Valence, probs=c(.25, .75), na.rm = FALSE)
-
-iqr <- IQR(db_NT_lmer$ReactionTime_Valence)
-
-# cutoff
-up <-  Q[2]+1.5*iqr # Upper Range  
-low<- Q[1]-1.5*iqr # Lower Range�
-
-db_NT_lmer$ReactionTime_Valence_outlier<- ifelse(db_NT_lmer$ReactionTime_Valence > (Q[1] - 1.5*iqr) & db_NT_lmer$ReactionTime_Valence < (Q[2]+1.5*iqr), "YES","NO")
-unique(db_NT_lmer$ReactionTime_Valence_outlier)
-
-db_NT_lmer%>%
-  ggplot(aes(VideoType, ReactionTime_Valence))+
-  geom_boxplot()+
-  facet_grid(DATASET~ReactionTime_Valence_outlier)
-
-paper_analyses$lmer_NT_ValRT<- lmer(log1p(ReactionTime_Valence+.5) ~ 
-                                     VideoType+DATASET + Emotion+
-                                    # VideoType+Emotion+
-                                    VideoType*Emotion*DATASET+
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_NT_lmer, db_NT_lmer$ReactionTime_Valence_outlier == "YES"))
-
-summary(paper_analyses$lmer_NT_ValRT)
-anova(paper_analyses$lmer_NT_ValRT)
-drop1(paper_analyses$lmer_NT_ValRT)
-step(paper_analyses$lmer_NT_ValRT)
-
-r.squaredGLMM(paper_analyses$lmer_NT_ValRT)
-
-
-
-paper_plots$ADFES_valence<- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'ADFES')%>%
-  filter(outlier_valence == FALSE)%>%
-  group_by(VideoType,Emotion, Emotion2, DATASET)%>%
-  mutate(mean_in = mean(AnswerRating_Valence, na.rm = TRUE))%>%
-  group_by(ParticipantPrivateID,group_pp_emotion, VideoType,Emotion,Emotion2,DATASET)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(Emotion2, AnswerRating_Valence, colour = VideoType))+
-  geom_point(pch = 21, position = position_jitterdodge(), alpha = .6)+
-  geom_boxplot(aes(y =mean_in), size = .7, width=0.7, fill="white", position=position_dodge(1))+
-  # geom_smooth(aes(group=group_pp_emotion), method = 'lm', se = F)+
-  # stat_summary(geom = 'pointrange')+
-  theme_classic()+
-  xlab("Emotion")+
-  ylab("Valence")+
-  ggtitle("High Prototypicality")
-
-paper_plots$ADFES_valence
-
-paper_plots$ADFES_valence<- paper_plots$ADFES_valence +
-  p$graphstyle+
-  scale_y_continuous(breaks = c(0, 50,10), limits = c(0,100))+
-  scale_color_brewer(palette = "Dark2")
-paper_plots$ADFES_valence
-
-
-
 ```
-
-
-Accuracy
-
-````{r}
-
-paper_plots$ADFES_acc <- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'ADFES')%>%
-  # filter(outlier_valence == FALSE)%>%
-  group_by(VideoType,Emotion, Emotion2, DATASET)%>%
-  mutate(mean_acc = mean(Recognacc, na.rm = TRUE))%>%
-  group_by(ParticipantPrivateID, VideoType,Emotion,Emotion2,DATASET)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(Emotion2, Recognacc, colour = VideoType))+
-  # geom_jitter()+
-  geom_point(pch = 21, position = position_jitterdodge(), alpha = .6)+
-  geom_boxplot(aes(y =mean_acc), size = .7, width=0.7, fill="white", position=position_dodge(1))+
-  # geom_smooth(aes(group=group_pp_emotion), method = 'lm', se = F)+
-  theme_classic()+
-  xlab("Emotion")+
-  ylab("Accuracy")+
-  ggtitle("High Prototypicality")
-
-paper_plots$ADFES_acc
-
-paper_plots$ADFES_acc<- paper_plots$ADFES_acc +
-  p$graphstyle+
-  scale_y_continuous(breaks = c(0, .5,1), limits = c(0,1))+
-  scale_color_brewer(palette = "Dark2")
-
-paper_plots$ADFES_acc
-```
-
-
-
-JEFFE accuracy
-
-```{r}
-
-paper_plots$JEFFE_acc<- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'JEFFE')%>%
-  filter(outlier_valence == FALSE)%>%
-  group_by(VideoType,Emotion, Emotion2, DATASET)%>%
-  mutate(mean_acc = mean(Recognacc, na.rm = TRUE))%>%
-  group_by(ParticipantPrivateID, VideoType,Emotion,Emotion2,DATASET)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(Emotion2, Recognacc, colour = VideoType))+
-  geom_point(pch = 21, position = position_jitterdodge(), alpha = .6)+
-  geom_boxplot(aes(y =mean_acc), size = .7, width=0.7, fill="white", position=position_dodge(1))+
-  theme_classic()+
-  xlab("Emotion")+
-  ylab("Accuracy")+
-  ggtitle("Low Prototypicality")
-
-
-
-paper_plots$JEFFE_acc<- paper_plots$JEFFE_acc +
-  p$graphstyle+
-  scale_y_continuous(breaks = c(0, .5,1), limits = c(0,1))+
-  scale_color_brewer(palette = "Dark2")
-
-paper_plots$ADFES_acc
-paper_plots$JEFFE_acc
-
-
-
-```
-
 
 
 ```{r}
 dplyr::write_rds(db_ASC_NT, "db_ASC_NT.rds")
-
-
 ```
-
-# JEFFE
-```{r}
-paper_plots$JEFFE_valence<- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'JEFFE')%>%
-  filter(outlier_valence == FALSE)%>%
-  group_by(VideoType,Emotion, Emotion2, DATASET)%>%
-  mutate(mean_in = mean(AnswerRating_Valence, na.rm = TRUE))%>%
-  group_by(ParticipantPrivateID, VideoType,Emotion,Emotion2,DATASET)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(Emotion2, AnswerRating_Valence, colour = VideoType))+
-  geom_point(pch = 21, position = position_jitterdodge(), alpha = .6)+
-  geom_boxplot(aes(y =mean_in), size = .7, width=0.7, fill="white", position=position_dodge(1))+
-  theme_classic()+
-  xlab("Emotion")+
-  ylab("Valence")+
-  ggtitle("Low Protypicality")
-
-
-
-paper_plots$JEFFE_valence<- paper_plots$JEFFE_valence +
-  p$graphstyle+
-  scale_y_continuous(breaks = c(0, 50,100), limits = c(0,100))+
-  scale_color_brewer(palette = "Dark2")
-
-paper_plots$ADFES_valence
-paper_plots$JEFFE_valence
-
-
- paper_plots$valence_patchwork<- paper_plots$ADFES_valence+ paper_plots$JEFFE_valence+
-   theme(axis.title.y = element_blank(), axis.title.x = element_blank())+
-   plot_layout(nrow = 1, ncol = 2, guides = 'collect')& theme(legend.position = 'top')
-  paper_plots$valence_patchwork
- paper_plots$intensity_patchwork 
-ggsave("valence_panel.png", paper_plots$valence_patchwork, device = 'png', width = 10, height =5 , dpi = 900) 
-
-ggsave("valence_panel.tiff", paper_plots$valence_patchwork, device = 'tiff', width = 10, height =
-         5,
-       dpi = 900) 
-```
-
-Analyse matched only
-```{r}
-# When we match we need to exclude surpise
-db_NT_matched<- subset(db_ASC_NT, db_ASC_NT$Group == "NT" & db_ASC_NT$matched == "YES")
-table(db_NT_matched$Emotion)
-
-
-db_ASCNT_matched<- subset(db_ASC_NT, db_ASC_NT$matched == "YES")
-table(db_NT_matched$Emotion)
-db_NT_matched<- subset(db_NT_matched, db_NT_matched$Emotion!= "Surprise")
-# db_NT_matched<- subset(db_NT_matched, db_NT_matched$Emotion!= "Fear")
-
-View(db_NT_matched)
-test_rankdef<-db_ASC_NT%>%
-  filter(Group == "NT" & matched == 'YES')%>%
-  group_by(ParticipantPrivateID, Emotion, VideoType, DATASET)%>%
-  summarise(n = n())
-test_rankdef
-unique(test_rankdef$n)
-```
-
 
 
 LMER intensity on full data
 
 
 ```{r}
-View(db_ASC_NT)
-unique(db_ASC_NT$Block)
 db_ASC_NT$VideoType<- as.factor(db_ASC_NT$VideoType)
 paper_analyses$lmer_NT_int2<- lmer(AnswerRating_Intensity ~ 
                                     VideoType + DATASET + Emotion+
@@ -437,904 +238,6 @@ paper_analyses$lmer_NT_int2<- lmer(AnswerRating_Intensity ~
                                     (1 | ParticipantPrivateID) + (1 | Video),
                                   REML = FALSE,
                                     data = subset(db_ASC_NT, db_ASC_NT$Group == "NT" & db_ASC_NT$outlier_intensity == FALSE))
-
-
-
-```
-
-
-test including speed and avg diff
-```{r}
-options(contrasts = c("contr.sum","contr.poly"))
-db_ASC_NT_2021 <- db_ASC_NT_2021 %>%
-  group_by(ParticipantPrivateID)%>%
-  mutate(morph_minus_original_avg_face_action_z_withinsucj =
-           scale(morph_minus_original_avg_face_action, center = TRUE, 
-                 scale = TRUE)[,1])%>%
-  mutate(morph_minus_original_avgspeed_face_action_z_withinsucj =
-           scale(morph_minus_original_avg_speed, center = TRUE, 
-                 scale = TRUE)[,1])%>%
-  mutate(face_action_AVG2_z_withinsucj =
-           scale(face_action_AVG2, center = TRUE, 
-                 scale = TRUE)[,1])%>%
-    mutate(speed_face_action_AVG2_z_withinsucj =
-           scale(speed_face_action_AVG2, center = TRUE, 
-                 scale = TRUE)[,1])
-  
-
-db_NT_2021<- subset(db_ASC_NT_2021, db_ASC_NT_2021$Group == "NT")
-
-```
-
-
-Valence
-
-```{r}
-
-
-
-
-```
-
-
-db_ASC_NT_2021
-
-```{r}
-options(contrasts = c("contr.sum","contr.poly"))
-paper_analyses$lmer_NT_int_with_diff_pred<- lmer(AnswerRating_Intensity ~ 
-                                    # VideoType + DATASET + Emotion+
-                                    # VideoType+Emotion+
-                                    (VideoType*Emotion*DATASET)*
-                                      (face_action_AVG2_z_withinsucj+
-                                       speed_face_action_AVG2_z_withinsucj)+  
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_ASC_NT_2021, db_ASC_NT_2021$Group == "NT" & db_ASC_NT$outlier_intensity == FALSE))
-
-  
-paper_analyses$lmer_NT_int_with_diff_pred<- lmer(AnswerRating_Intensity ~ 
-                                    # VideoType + DATASET + Emotion+
-                                    # VideoType+Emotion+
-                                    (VideoType*Emotion*DATASET)*
-                                      (morph_minus_original_avg_face_action_z_withinsucj+
-                                       morph_minus_original_avgspeed_face_action_z_withinsucj)+  
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_ASC_NT_2021, db_ASC_NT_2021$Group == "NT" & db_ASC_NT$outlier_intensity == FALSE))
-
-anova(paper_analyses$lmer_NT_int_with_diff_pred)
-
-
-step(paper_analyses$lmer_NT_int_with_diff_pred, direction = "both")
-
-# continue
-save(db_ASC_NT_2021, db_of7_new_2021_select_agg,
-     db_of7_new_2021_select_morph_isx_diff_avg,
-     db_of7_new_2021_select,db_of7_new, db_of7_new_2021, paper_analyses,
-     file = "Study2_analyses_andplots_2021.RData")
-```
-
-
-08/04/2021
-```{r}
-# let's start by plotting influene of speed on ratings
-library(tidyverse)
-
-# acros participants
-db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(speed_face_action_AVG2_z_withinsucj, Recognacc, color = Emotion))+
-  geom_point()+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(aes(group = Emotion), se = F, method = 'lm')
-
-# one line across emotions - disp
-db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_AVG2, Recognacc))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-   ggpubr::stat_cor(method="pearson")
-
-db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_AVG2, Recognacc))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(~Dataset)+
-  geom_smooth(se = F, method = 'lm')+
-   ggpubr::stat_cor(method="pearson")
-
-# Increasing face chnge is related to poorer emotion recognition accuracy
-
-# speed
-
-db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(speed_face_action_AVG2, Recognacc))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-  ggpubr::stat_cor(method="pearson")
-
-# db_ASC_NT_2021 %>%
-#   group_by(video,Dataset, VideoType, Emotion)%>%
-#   summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-#   ggplot(aes(speed_face_action_AVG2, Recognacc))+
-#   geom_point(aes(color = Emotion))+
-#   facet_grid(~Dataset)+
-#   geom_smooth(se = F, method = 'lm')+
-#   ggpubr::stat_cor(method="pearson")
-
-
-
-# ratings
-# valence
-
-  db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_AVG2, AnswerRating_Valence))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-   ggpubr::stat_cor(method="pearson")
-  
-  
-  #   db_ASC_NT_2021 %>%
-  # group_by(video,Dataset, VideoType, Emotion)%>%
-  # summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  # ggplot(aes(face_action_AVG2, AnswerRating_Valence))+
-  # geom_point(aes(color = Emotion))+
-  # facet_grid(~Dataset)+
-  # geom_smooth(se = F, method = 'lm')+
-  # ggpubr::stat_cor(method="pearson")
-
-# displacement affects recognition differently in dtasets but not morph
-
-# speed
-
-db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(speed_face_action_AVG2, AnswerRating_Valence))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-  ggpubr::stat_cor(method="pearson")
-  
- 
- #intensity
-
-
-  db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_AVG2, AnswerRating_Intensity))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-   ggpubr::stat_cor(method="pearson")
-  
-  # increasing act
-
-# speed
-
-db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(speed_face_action_AVG2, AnswerRating_Intensity))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-  ggpubr::stat_cor(method="pearson")
-
-
-
-# naturality
-  db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_AVG2, AnswerRating_Naturality))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-   ggpubr::stat_cor(method="pearson")
-  
-  # increasing act
-
-# speed
-
-db_ASC_NT_2021 %>%
-  group_by(video,Dataset, VideoType, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(speed_face_action_AVG2, AnswerRating_Naturality))+
-  geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~VideoType)+
-  geom_smooth(se = F, method = 'lm')+
-  ggpubr::stat_cor(method="pearson")
-
-
-# check individual effects
-db_ASC_NT_2021 %>%
-  group_by(ParticipantPrivateID, video,Dataset, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(speed_face_action_AVG2, AnswerRating_Naturality))+
-  # geom_point(aes(color = Emotion))+
-  facet_grid(Dataset~Emotion)+
- stat_smooth(aes(group =ParticipantPrivateID), method = 'lm', se = F, color = "gray")+
-  ggpubr::stat_cor(method="pearson")
-
-
-```
-
-
-Plot the differences
-
-
-```{r}
-colnames(db_ASC_NT_2021)
-
-db_ASC_NT_2021_cbind <- select(db_ASC_NT_2021 , c(1:8,10,15,27,50,44,76:78,87,88,91:99, 'Dataset'))
-
-# bind morph and originals by participant, dataset, video_id, facemotion dataset
-
-nrow(db_ASC_NT_2021_cbind)/2 # 6384 the dataset below should be this many rows
-
-colnames(db_ASC_NT_2021_cbind)
-
-
-unique(db_ASC_NT_2021_cbind$video_id)
-
-unique(db_ASC_NT_2021_cbind$face_emotion_dataset)
-db_ASC_NT_2021_cbind1 <- left_join(subset(db_ASC_NT_2021_cbind, VideoType == "Original"), 
-          subset(db_ASC_NT_2021_cbind, VideoType != "Original"),
-          by = c('ParticipantPrivateID',"Group", 'Emotion','video_id','Block',
-                 'Dataset', 'morph_minus_original_avg_face_action',
-                 'morph_minus_original_avg_speed',
-                 'morph_minus_original_avg_face_action_z_withinsucj',
-                 'morph_minus_original_avgspeed_face_action_z_withinsucj'))
-
-nrow(db_ASC_NT_2021_cbind1)
-
-colnames(db_ASC_NT_2021_cbind1)
-# x columns are orignal, y are morphs
-
-db_ASC_NT_2021_cbind1 <- db_ASC_NT_2021_cbind1%>%
-  mutate(intensity_orig_minus_morph = AnswerRating_Intensity.x- 
-           AnswerRating_Intensity.y,
-         valence_orig_minus_morph = AnswerRating_Valence.x- 
-           AnswerRating_Valence.y,
-         naturality_orig_minus_morph = AnswerRating_Naturality.x-
-           AnswerRating_Naturality.y,
-         recognition_orig_minus_morph = Recognacc.x - Recognacc.y)
-
-
-1260083	B	F02_Fear_ADFES_Morph.mp4
-1260083	B	F02_Disgust_ADFES_Original.mp4
-
-test<- subset(db_ASC_NT_2021_cbind1, is.na(db_ASC_NT_2021_cbind1$AnswerRating_Intensity.y))
-
-test1<- subset(db_ASC_NT_2021_cbind, ParticipantPrivateID == 1260083 & VideoType == "Original")
-
-test2<- subset(db_ASC_NT_2021_cbind, ParticipantPrivateID == 1260083 & VideoType != "Original")
-
-
-table(is.na(db_ASC_NT_2021_cbind1$AnswerRating_Intensity.y))
-View(test)
-View(test1)
-View(test2)
-
-test3<- subset(db_ASC_NT_2021_cbind1, ParticipantPrivateID == 1260083)
-
-table(is.na(test3$AnswerRating_Intensity.y))
-
-table(test3$Emotion, is.na(test3$AnswerRating_Intensity.y))
-```
-
-
-```{r}
-
-db_ASC_NT_2021_cbind1 %>%
-  subset(Group == "NT")%>%
-  group_by(video_id, Dataset, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(
-             morph_minus_original_avg_face_action,
-             valence_orig_minus_morph
-             ))+
-  geom_point(aes(color = Emotion))+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  geom_smooth(method = 'lm', se = F, size = 2, color = "red")+
-  facet_grid(~Dataset)+
-    ggpubr::stat_cor(method="pearson")
-
-
-
-
-# db_ASC_NT_2021_cbind %>%
-#   group_by(ParticipantPrivateID, Dataset)%>%
-#   mutate(val_dyn = cor.test(AnswerRating_Naturality,
-#                                  speed_face_action_AVG2)$estimate)%>%
-#   ggplot(aes(Dataset, val_dyn))+
-#   stat_summary(aes(group= ParticipantPrivateID), geom = 'point', position = 'jitter',
-#   width = .1)+
-#   stat_summary(geom = 'pointrange', color = 'red', size = 2)
-  
-  
-           
-           # video_id, Dataset, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(
-             morph_minus_original_avg_face_action,
-             valence_orig_minus_morph
-             ))+
-  geom_point(aes(color = Emotion))+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  geom_smooth(method = 'lm', se = F, size = 2, color = "red")+
-  facet_grid(~Dataset)+
-    ggpubr::stat_cor(method="pearson")
-
-
-
-```
-
-
-
-can we ue similarity of dynamics to predict similairy of of dugements
-
-
-```{r}
-db_ASC_NT_2021_cbind1%>%
-  subset(Group == "NT")%>%
-  group_by(ParticipantPrivateID, Dataset)%>%
-  mutate(cor_avgface = cor.test(face_action_AVG2.x, face_action_AVG2.y)$estimate)%>%
-  mutate(cor_rat  = cor.test(AnswerRating_Intensity.x, AnswerRating_Intensity.y)$estimate)%>%
-  ggplot(aes(cor_avgface, cor_rat, color = Dataset))+
-  geom_point()
-  facet_grid(~Block.x)
-
-
-
-```
-
-```{r}
-db_ASC_NT_2021_cbind1 %>%
-  subset(Group == "NT")%>%
-  group_by(video_id, Dataset, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(
-             morph_minus_original_avg_face_action,
-             intensity_orig_minus_morph
-             ))+
-  geom_point(aes(color = Emotion))+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  geom_smooth(method = 'lm', se = F, size = 2, color = "red")+
-  facet_grid(~Dataset)+
-    ggpubr::stat_cor(method="pearson")
-
-```
-
-
-```{r}
-
-db_ASC_NT_2021_cbind1 %>%
-  group_by(ParticipantPrivateID, Dataset, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(
-             morph_minus_original_avg_face_action_z_withinsucj,
-            recognition_orig_minus_morph 
-             ))+
-  geom_point(aes(color = Emotion))+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  geom_smooth(method = 'lm', se = F, size = 2, color = "red")+
-  facet_grid(~Dataset)+
-    ggpubr::stat_cor(method="pearson")
-
-# compute similarity of stimuli
-
-db_ASC_NT_2021_cbind1%>%
-  subset(Group == "NT")%>%
-  group_by(ParticipantPrivateID, Dataset)%>%
-  mutate(cor_avgface = cor.test(face_action_AVG2.x, face_action_AVG2.y)$estimate)
-  # mutate(cor_rat  = cor.test(AnswerRating_Intensity.x,
-
-left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-   subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(video_id, Dataset)%>%
-  mutate(valence_orig_minus_morph = mean(valence_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, valence_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-
-
-left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-   subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-   subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(video_id, Dataset)%>%
-  mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, intensity_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-
-
-left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-   subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(video_id, Dataset)%>%
-  mutate(naturality_orig_minus_morph = mean(naturality_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, naturality_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  # facet_grid(~Dataset)
-
-left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(video_id, Dataset)%>%
-  mutate(recognition_orig_minus_morph = mean(recognition_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, Recognacc.y))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()+
-  facet_grid(~Dataset)
-
-# speed
-
-left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(video_id, Dataset)%>%
-   subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(valence_orig_minus_morph = mean(valence_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_speed_correlation, valence_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()+
-  facet_grid(~Dataset)
-
-```
-
-
-```{r}
-  
-  
-  left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(video_id, Dataset)%>%
-     subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_speed_correlation, intensity_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-
-colnames(db_ASC_NT_2021_cbind1)
-  left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(video_id, Dataset)%>%
-    arrange(video_id,ParticipantPrivateID)%>%
-  mutate(cor_intensity = cor.test(AnswerRating_Intensity.x, AnswerRating_Intensity.y, 
-                                  use = 'complete')$estimate)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  # mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  # summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, cor_intensity))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-  colnames(db_ASC_NT_2021_cbind1)
-  left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(video_id, Dataset)%>%
-    arrange(video_id,ParticipantPrivateID)%>%
-  mutate(cor_valence = cor.test(AnswerRating_Valence.x, AnswerRating_Valence.y, 
-                                  use = 'complete')$estimate)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  # mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  # summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, cor_valence))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-```
-  
-
-quick check aq and tas
-
-
-```{r}
-  left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(ParticipantPrivateID)%>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(AQ_score_total.x, intensity_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-    left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(ParticipantPrivateID)%>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(TAS_score_total.x, intensity_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-
-
-
-  
-    left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(ParticipantPrivateID)%>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(valence_orig_minus_morph = mean(valence_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(AQ_score_total.x, valence_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-    left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(ParticipantPrivateID)%>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(valence_orig_minus_morph = mean(valence_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(TAS_score_total.x, valence_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-      left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(ParticipantPrivateID)%>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(naturality_orig_minus_morph = mean(naturality_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(AQ_score_total.x, valence_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-    left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  group_by(ParticipantPrivateID)%>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  mutate(naturality_orig_minus_morph = mean(naturality_orig_minus_morph, na.rm = TRUE))%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(TAS_score_total.x, naturality_orig_minus_morph))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-   left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-    subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(ParticipantPrivateID, Dataset)%>%
-    arrange(video_id,ParticipantPrivateID)%>%
-  mutate(cor_intensity = cor.test(AnswerRating_Intensity.x, AnswerRating_Intensity.y, 
-                                  use = 'complete')$estimate)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  # mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  # summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(AQ_score_total.x, cor_intensity))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()+
-  facet_grid(~Dataset)
-  
-
-```
-```{r}
-  
-
-  left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-   subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(video_id, Dataset)%>%
-  arrange(video_id,ParticipantPrivateID)%>%
-  mutate(cor_naturality = cor.test(AnswerRating_Naturality.x, AnswerRating_Naturality.y, 
-                                  use = 'complete')$estimate)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  # mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  # summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, cor_naturality))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-
-  ltm::biserial.cor(db_ASC_NT_2021_cbind1$Recognacc.x, db_ASC_NT_2021_cbind1$Recognacc.y)
-  
-  left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-   subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(video_id, Dataset)%>%
-  arrange(video_id,ParticipantPrivateID)%>%
-  mutate(cor_acc = cor.test(Recognacc.x, Recognacc.y, 
-                                use = 'complete.obs')$estimate) %>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  # mutate(intensity_orig_minus_morph = mean(intensity_orig_minus_morph, na.rm = TRUE))%>%
-  # summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(face_action_correlation, cor_acc ))+
-  geom_point()+
-  geom_smooth(method = 'lm', se = F)+
-  # geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  ggpubr::stat_cor()
-  facet_grid(~Dataset)
-  
-  
-  
-  
-  left_join(db_ASC_NT_2021_cbind1, db_of7_new_2021_select_origi_morph_cbind_agg,
-                           by = "video_id") %>%
-  subset(!is.na(AnswerRating_Intensity.y)& Group == "NT")%>%
-  group_by(ParticipantPrivateID, Dataset)%>%
-  # arrange(video_id,ParticipantPrivateID)%>%
-  mutate(cor_acc = cor.test(Recognacc.x, Recognacc.y, 
-                               type = "pearson", use = 'complete.obs')$estimate) %>%
-  ggplot(aes(Dataset, cor_acc))+
-    geom_point()+
-    geom_line(aes(group = ParticipantPrivateID))+
-    stat_summary(geom = 'pointrange', color = 'red', size = 1.5)
-  
-  
-  # check correlation of accuracy
-  
-db_ASC_NT_2021_cbind1%>%
-  subset(Group == "NT")%>%
-  group_by(ParticipantPrivateID, Dataset)%>%
-  ggplot(aes(Dataset, Recognacc.x))+
-  stat_summary(aes(group = ParticipantPrivateID), geom = 'point')+
-  
-  # stat_summary(aes(group = ParticipantPrivateID, y = Recognacc.x), geom = 'point',)+
-  stat_summary(aes(group = ParticipantPrivateID), geom = 'line')
-  # facet_grid(~D)
-
-
-db_ASC_NT_2021%>%
-  subset(Group == "NT")%>%
-  group_by(ParticipantPrivateID, Dataset, VideoType)%>%
-  ggplot(aes(VideoType, Recognacc))+
-  stat_summary(aes(group = ParticipantPrivateID), geom = 'point')+
-  
-  # stat_summary(aes(group = ParticipantPrivateID, y = Recognacc.x), geom = 'point',)+
-  stat_summary(aes(group = ParticipantPrivateID), geom = 'line')+
-  facet_grid(~Dataset)
-
-
-db_ASC_NT_2021%>%
-  subset(Group == "NT")%>%
-  group_by(ParticipantPrivateID, Dataset, VideoType)%>%
-  ggplot(aes(Dataset, Recognacc))+
-  stat_summary(aes(group = ParticipantPrivateID), geom = 'point')+
-  
-  # stat_summary(aes(group = ParticipantPrivateID, y = Recognacc.x), geom = 'point',)+
-  stat_summary(aes(group = ParticipantPrivateID), geom = 'line')+
-  facet_grid(~VideoType)
-```
-
-
-db_ASC_NT_2021_cbind1 %>%
-  group_by(ParticipantPrivateID, Dataset, Emotion)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(
-             morph_minus_original_avg_face_action,
-             valence_orig_minus_morph
-             ))+
-  geom_point(aes(color = Emotion))+
-  geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F)+
-  geom_smooth(method = 'lm', se = F, size = 2, color = "red")+
-  facet_grid(~Dataset)+
-    ggpubr::stat_cor(method="pearson")
-
-  
-  x axis - negative  = morph rating > original
-  y axis = negative = original > face action
-```
-
-
-fit model quickly
-
-
-```{r}
-options(contrasts = c("contr.sum","contr.poly"))
-diff_models<- list()
-
-
-db_ASC_NT_2021_cbind1<- db_ASC_NT_2021_cbind1 %>%
-  # group_by(ParticipantPrivateID)%>%
-  mutate(morph_minus_original_avg_face_action_z =
-           scale(morph_minus_original_avg_face_action, center = TRUE,
-                 scale = TRUE)[,1])%>%
-  mutate(morph_minus_original_avg_speed_z =
-           scale(morph_minus_original_avg_speed , center = TRUE,
-                 scale = TRUE)[,1])
-
-
-db_ASC_NT_2021_cbind1%>%
-  ggplot(aes(morph_minus_original_avg_face_action_z, morph_minus_original_avg_speed_z))+
-           geom_point()
-         
-library(lmerTest)
-
-diff_models$valence <- lmer(valence_orig_minus_morph ~ Dataset*Emotion*
-                             (morph_minus_original_avg_face_action_z+
-                             morph_minus_original_avg_speed_z)+
-                             (1| ParticipantPrivateID) + (1| video_id),
-                           REML = FALSE,
-                             data = db_ASC_NT_2021_cbind1)
-  
-anova(diff_models$valence)
-
-summary(diff_models$valence)
-
-# intensity
-
-diff_models$intensity <- lmer(intensity_orig_minus_morph ~ Dataset*Emotion*
-                             (morph_minus_original_avg_face_action_z+
-                             morph_minus_original_avg_speed_z)+
-                             (1| ParticipantPrivateID) + (1| video_id),
-                           REML = FALSE,
-                             data = db_ASC_NT_2021_cbind1)
-  
-anova(diff_models$intensity)
-
-summary(diff_models$intensity)
-plot(diff_models$intensity)
-
-
-diff_models$naturality <- lmer(naturality_orig_minus_morph ~ Dataset*Emotion*
-                             (morph_minus_original_avg_face_action_z+
-                             morph_minus_original_avg_speed_z)+
-                             (1| ParticipantPrivateID) + (1| video_id),
-                           REML = FALSE,
-                             data = db_ASC_NT_2021_cbind1)
-  
-anova(diff_models$naturality)
-
-summary(diff_models$naturality)
-plot(diff_models$naturality)
-
-
-diff_models$recognition <- glmer(recognition_orig_minus_morph ~ Dataset*
-                             (morph_minus_original_avg_face_action_z+
-                             morph_minus_original_avg_speed_z)+
-                             (1| ParticipantPrivateID) + (1| video_id),
-                          family = "Poisson",
-                             data = db_ASC_NT_2021_cbind1)
-  
-anova(diff_models$recognition )
-
-summary(diff_models$naturality)
-plot(diff_models$recognition )
-
-# use original face action info
-
-
-db_ASC_NT_2021<- db_ASC_NT_2021%>%
-  mutate(face_action_AVG2_z =
-           scale(face_action_AVG2, center = TRUE,
-                 scale = TRUE)[,1])%>%
-  mutate(speed_face_action_AVG2_z =
-           scale(speed_face_action_AVG2 , center = TRUE,
-                 scale = TRUE)[,1])
-diff_models$val2<-  lmer(log1p(AnswerRating_Valence+.1) ~ 1 + 
-                                    VideoType*Emotion* DATASET * 
-                           (face_action_AVG2_z+
-                              speed_face_action_AVG2_z)+
-                              
-                                    # VideoType*Emotion*DATASET+ dropped insigifiant terms
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_ASC_NT_2021, Group == "NT")) 
-
-
-anova(diff_models$val2)
-
-summary(diff_models$val2)
-
-plot(diff_models$val2)
-
-
-diff_models$int3<-  lmer(AnswerRating_Intensity ~ 1 + 
-                                    VideoType*Emotion* DATASET * 
-                           (face_action_AVG2_z+
-                              speed_face_action_AVG2_z)+
-                              
-                                    # VideoType*Emotion*DATASET+ dropped insigifiant terms
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_ASC_NT_2021, Group == "NT"))
-
-
-
-plot(diff_models$int3)
-
-
-diff_models$nat3<-  lmer(AnswerRating_Naturality ~ 1 + 
-                            VideoType +Emotion+ DATASET + 
-                            VideoType:Emotion+ 
-                           DATASET:VideoType+
-                           Emotion:DATASET+
-                           
-                                  
-                           # (face_action_AVG2_z+
-                           #    speed_face_action_AVG2_z)+
-                           #    
-                                    # VideoType*Emotion*DATASET+ dropped insigifiant terms
-                                    (1| ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_ASC_NT_2021, 
-                                                  outlier_naturality == FALSE & Group == "NT"))
-
-table(is.na(db_ASC_NT_2021$outlier_naturality))
-unique(db_ASC_NT_2021$Group)
-test<- subset(db_ASC_NT_2021, is.na(outlier_naturality))
-anova(diff_models$nat3)
-summary(diff_models$nat3)
-```
-
-
-
 
 anova(paper_analyses$lmer_NT_int2)
 summary(paper_analyses$lmer_NT_int2)
@@ -1368,7 +271,7 @@ plot(paper_analyses$lmer_NT_int)
 qqnorm(resid(paper_analyses$lmer_NT_int))
 qqline(resid(paper_analyses$lmer_NT_int)) # broadly fine
 r.squaredGLMM(paper_analyses$lmer_NT_int)
-r.squaredGLMM(paper_analyses$lmer_NT_int1) # really smalll
+r.squaredGLMM(paper_analyses$lmer_NT_int1) #  smalll
 
 
 
@@ -1379,262 +282,6 @@ paper_analyses$lmer_NT_int_analyze
 
 ```
 
-Plotting
-
-
-```{r}
-
-# Plotting preferences
-sf = 1
-p$graphstyle <-  theme(#base plot theme
-  # axis
-  axis.line.y = element_line(),
-  axis.line.x = element_line(),
-  axis.text.x = element_text(size = 15+(sf+.5), family = "sans", colour = "black", hjust = .8), #angle = 45,
-  axis.text.y = element_text(size = 15+(sf+.5), family = "sans", colour = "black"),
-  #axis.ticks = element_blank(),
-  #axis.text.y = element_text(size= 18, family = "Arial Narrow", colour="black"),
-  axis.title.y=element_text(size = 16*(sf+.7), margin=margin(0,5,0,0)),
-  axis.title.x=element_text(size = 16*(sf+.7), margin=margin(0,5,0,0)),
-  
-  # strips
-  strip.background = element_blank(),
-  strip.text.x = element_text(size = 12*(sf+.5),  colour = "black"),
-  strip.text.y = element_text(size = 12*(sf+.5),  colour = "black"),
-  
-  # panel
-  # panel.background = element_rect(colour = NA),
-  # plot.background = element_rect(colour = NA),
-  # panel.border = element_rect(colour = NA),
-  # panel.border = element_blank(),
-  # panel.grid.major = element_blank(),
-  # panel.grid.minor = element_blank(),
-  # panel.background = element_blank(),
-  
-  # legend
-  # legend.title = element_text(size = 10*(sf+.3)),
-  legend.position = "top",
-  legend.direction = "horizontal",
-  #legend.key.size = unit(.5, "cm"),
-  #legend.text = element_text(size = 10*sf),
-  legend.title=element_blank(),
-  #legend.text = element_blank(),
-  legend.key = element_rect(colour = "transparent", fill="transparent"),
-  # text
-  text=element_text(size = 16*(sf+.4), family = "sans"))
- 
-# 
-install.packages("grid")
-   library(grid)
-    library(ggthemes)
-theme_Publication <- function(base_size=14, base_family="helvetica") {
-   
-      (theme_foundation(base_size=base_size, base_family=base_family)
-       + theme(plot.title = element_text(face = "bold",
-                                         size = rel(1.2), hjust = 0.5),
-               text = element_text(),
-               panel.background = element_rect(colour = NA),
-               plot.background = element_rect(colour = NA),
-               panel.border = element_rect(colour = NA),
-               axis.title = element_text(face = "bold",size = rel(1)),
-               axis.title.y = element_text(angle=90,vjust =2),
-               axis.title.x = element_text(vjust = -0.2),
-               axis.text = element_text(), 
-               axis.line = element_line(colour="black"),
-               axis.ticks = element_line(),
-               panel.grid.major = element_line(colour="#f0f0f0"),
-               panel.grid.minor = element_blank(),
-               legend.key = element_rect(colour = NA),
-               legend.position = "bottom",
-               legend.direction = "horizontal",
-               legend.key.size= unit(0.2, "cm"),
-               legend.margin = unit(0, "cm"),
-               legend.title = element_text(face="italic"),
-               plot.margin=unit(c(10,5,5,5),"mm"),
-               strip.background=element_rect(colour="#f0f0f0",fill="#f0f0f0"),
-               strip.text = element_text(face="bold")
-          ))
-      
-}
-
-scale_fill_Publication <- function(...){
-      library(scales)
-      discrete_scale("fill","Publication",manual_pal(values = c("#386cb0","#fdb462","#7fc97f","#ef3b2c","#662506","#a6cee3","#fb9a99","#984ea3","#ffff33")), ...)
-
-}
-
-scale_colour_Publication <- function(...){
-      library(scales)
-      discrete_scale("colour","Publication",manual_pal(values = c("#386cb0","#fdb462","#7fc97f","#ef3b2c","#662506","#a6cee3","#fb9a99","#984ea3","#ffff33")), ...)
-
-}
-
-install.packages("emojifont")
-library(emojifont)
-library(gridExtra)
-paper_plots<- list()
-
-db_ASC_NT$Emotion2<-toupper( substr(db_ASC_NT$Emotion, 1,2))
-paper_plots$JeFEE_intensity <- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'JEFFE')%>%
-  filter(outlier_intensity == FALSE)%>%
-  group_by(VideoType,Emotion, Emotion2, DATASET)%>%
-  mutate(mean_in = mean(AnswerRating_Intensity, na.rm = TRUE))%>%
-  group_by(ParticipantPrivateID, VideoType,Emotion,Emotion2,DATASET)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(Emotion2, AnswerRating_Intensity, colour = VideoType))+
-  geom_point(pch = 21, position = position_jitterdodge(), alpha = .6)+
-  geom_boxplot(aes(y =mean_in), size = .7, width=0.7, fill="white", position=position_dodge(1))+
-  theme_classic()+
-  xlab("Emotion")+
-  ylab("Intensity")+
-  ggtitle("Low Prototypicality")
-  # scale_fill_viridis_d()+
-
-  
-  
-  # scale_colour_Publication()+
-paper_plots$JeFEE_intensity<- paper_plots$JeFEE_intensity +
-  p$graphstyle+
-  scale_y_continuous(breaks = c(0, 50,100), limits = c(0,100))+
-  scale_color_brewer(palette = "Dark2")
-paper_plots$JeFEE_intensity
-
-
-```
-
-# JeFEE
-```{r}
-paper_plots$ADFES_intensity<- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'ADFES')%>%
-  filter(outlier_intensity == FALSE)%>%
-  group_by(VideoType,Emotion, Emotion2, DATASET)%>%
-  mutate(mean_in = mean(AnswerRating_Intensity, na.rm = TRUE))%>%
-  group_by(ParticipantPrivateID, VideoType,Emotion,Emotion2,DATASET)%>%
-  summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(Emotion2, AnswerRating_Intensity, colour = VideoType))+
-  geom_point(pch = 21, position = position_jitterdodge(), alpha = .6)+
-  geom_boxplot(aes(y =mean_in), size = .7, width=0.7, fill="white", position=position_dodge(1))+
-  theme_classic()+
-  xlab("Emotion")+
-  ylab("Intensity")+
-  ggtitle("High protypicality")
-  # scale_fill_viridis_d()+
-
-paper_plots$ADFES_intensity<- paper_plots$ADFES_intensity +
-  p$graphstyle+
-  scale_y_continuous(breaks = c(0, 50,100), limits = c(0,100))+
-  scale_color_brewer(palette = "Dark2")
-paper_plots$ADFES_intensity
-paper_plots$JeFEE_intensity
-
-
-
-
-
-library(patchwork)
-
-
- paper_plots$intensity_patchwork<- paper_plots$ADFES_intensity+ paper_plots$JeFEE_intensity+ theme(axis.title.y = element_blank(), axis.title.x = element_blank())+
-  plot_layout(nrow = 1, ncol = 2, guides = 'collect')& theme(legend.position = 'top')
- 
- paper_plots$intensity_patchwork 
-ggsave("intensity_panel.png", paper_plots$intensity_patchwork, device = 'png', width = 10, height =5 , dpi = 900) 
-
-ggsave("intensity_panel.tiff", paper_plots$intensity_patchwork, device = 'tiff', width = 10, height =
-         5,
-       dpi = 900) 
-
-
-
-```
-
-
-```{r}
-
-# RT
-
-
-Q <- quantile(db_NT_lmer$ReactionTime_Intensity, probs=c(.25, .75), na.rm = FALSE)
-
-iqr <- IQR(db_NT_lmer$ReactionTime_Intensity)
-
-# cutoff
-up <-  Q[2]+1.5*iqr # Upper Range  
-low<- Q[1]-1.5*iqr # Lower Range�
-
-db_NT_lmer$ReactionTime_Intensity_outlier<- ifelse(db_NT_lmer$ReactionTime_Intensity > (Q[1] - 1.5*iqr) & db_NT_lmer$ReactionTime_Intensity < (Q[2]+1.5*iqr), "YES","NO")
-unique(db_NT_lmer$ReactionTime_Intensity_outlier)
-
-db_NT_lmer%>%
-  ggplot(aes(VideoType, ReactionTime_Intensity))+
-  geom_boxplot()+
-  facet_grid(DATASET~ReactionTime_Intensity_outlier)
-
-paper_analyses$lmer_NT_intRT<- lmer(log1p(ReactionTime_Intensity+.5) ~ 
-                                     VideoType+DATASET + Emotion+
-                                    # VideoType+Emotion+
-                                    VideoType*Emotion*DATASET+
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = subset(db_NT_lmer, db_NT_lmer$ReactionTime_Intensity_outlier == "YES"))
-
-summary(paper_analyses$lmer_NT_intRT)
-anova(paper_analyses$lmer_NT_intRT)
-drop1(paper_analyses$lmer_NT_intRT)
-step(paper_analyses$lmer_NT_intRT)
-
-r.squaredGLMM(paper_analyses$lmer_NT_intRT)
-```
-
-
-LMER intensity on matched data
-
-```{r}
-
-paper_analyses$lmer_NT_int_matched<- lmer(AnswerRating_Intensity ~ 
-                                    VideoType + DATASET + Emotion+
-                                    VideoType*Emotion+
-                                    VideoType*DATASET+
-                                    # DATASET*Emotion+
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = db_NT_matched)
-
-summary(paper_analyses$lmer_NT_int_matched)
-drop1(paper_analyses$lmer_NT_int_matched)
-anova(paper_analyses$lmer_NT_int_matched)
-step(paper_analyses$lmer_NT_int_matched) # again only support for main effec models (consistent with the one above)
-
-library(MuMIn)
-r.squaredGLMM(paper_analyses$lmer_NT_int_matched)
-
-plot(paper_analyses$lmer_NT_int_matched)
-qqnorm(resid(paper_analyses$lmer_NT_int_matched))
-qqline(resid(paper_analyses$lmer_NT_int_matched)) # broadly fine
-
-
-
-# study 2
-
-study2$lmer_ASCNT_int_matched<- lmer(AnswerRating_Intensity ~ 
-                                    VideoType + DATASET + Emotion+Group+
-                                    VideoType*Emotion*DATASET*Group+
-                                    # VideoType*DATASET+
-                                    # DATASET*Emotion+
-                                    (1 | ParticipantPrivateID) + (1 | Video),
-                                  REML = FALSE,
-                                    data = db_ASCNT_matched)
-# consistent
-
-anova(study2$lmer_ASCNT_int_matched)
-step(rou_ASCNT_int_matched)
-
-tab_model(study2$lmer_ASCNT_int_matched)
-
-
-# grou intercations are non significant
-
-
-```
 
 
 lmer - valence - IQ and age matched participants
