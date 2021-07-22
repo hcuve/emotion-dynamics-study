@@ -7,12 +7,27 @@ output: html_document
 
 "remove some unnecessary duplicates
 
-
+load("D:/OneDrive - Nexus365/Face Morph Paper/Data/Study2_plots.RData"
 
 ```{r}
 db_ASC_NT, db_ASC_NT$Group == "NT"
 
+colnames(db_ASC_NT)
 
+db_ASC_NT$Participant<- db_ASC_NT$ParticipantPrivateID
+
+
+ lmer(AnswerRating_Valence ~ 1 + DATASET + Emotion+
+                                    Emotion*DATASET+(1| ParticipantPrivateID) + (1 | Video),
+                                  REML = FALSE,
+                                    data = subset(db_ASC_NT, db_ASC_NT$Group == "NT"))
+study2<- db_ASC_NT%>%
+  subset(Group == "NT")%>%
+  select(c(90,24,3:10,15,33,37, stim_id, Actor_ID))
+
+saveRDS(study2, "study2.rds")
+
+write_csv(study2, "study2.csv")
 
 ```
 
