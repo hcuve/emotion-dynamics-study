@@ -1,0 +1,525 @@
+---
+title: "stimuli-participant similarity"
+output: html_document
+date: "2023-05-31"
+---
+
+
+```{r}
+nonlinearity_dfsel
+
+table(nonlinearity_dfsel$Dataset, nonlinearity_dfsel$morph)
+
+colnames(nonlinearity_dfsel)
+library(reshape2)
+
+# Apply dcast for each numeric variable
+nonlinearity_df = dcast(nonlinearity_dfsel,  face_id + face_unique + Dataset + Emotion ~ morph, value.var = "nonlinearity")
+linearity_df = dcast(nonlinearity_dfsel, face_id + face_unique + Dataset + Emotion ~ morph, value.var = "linearity")
+curvature_df = dcast(nonlinearity_dfsel, face_id + face_unique + Dataset + Emotion ~ morph, value.var = "curvature")
+
+# Merge the data frames together by all non-numeric variables
+nonlinearity_df_dcast = Reduce(function(x, y) merge(x, y), list(nonlinearity_df, linearity_df, curvature_df))
+nonlinearity_df_dcast
+# more efficient
+# Pivot data to wider format
+require(tidyverse)
+nonlinearity_dfsel_wide <- nonlinearity_dfsel %>%
+  pivot_wider(names_from = morph, 
+              values_from = c(nonlinearity, linearity, curvature), 
+              names_sep = "_")
+
+
+# Reshape data
+require(data.table)
+nonlinearity_df_dcast <- dcast(setDT(nonlinearity_dfsel), face_unique + Dataset + Emotion ~ morph, 
+                 value.var = c("nonlinearity", "linearity",
+                               "curvature","entropy"), 
+                 fun.aggregate = mean, na.rm = TRUE)
+
+nonlinearity_df_dcast
+table(nonlinearity_df_dcast$face_unique)
+
+table(nonlinearity_df_dcast$Dataset)
+
+nonlinearity_df_dcast%>%
+  ggplot(aes(linearity_Original, linearity_Morph))+
+  geom_point()+
+  geom_smooth(method = "lm", se = F)+
+  facet_grid(~Dataset)
+
+nonlinearity_df_dcast%>%
+  ggplot(aes(curvature_Original, curvature_Morph, colour = Emotion, 
+             shape = Emotion))+
+  geom_point()+
+  # geom_smooth(method = "lm", se = F)+
+  facet_grid(~Dataset)+
+  geom_vline(xintercept = 0)+
+  geom_hline(yintercept = 0)
+
+# One thought here is that the incorporated stimuli (i.e., where one #metricis high morph and low for the other) should produce the largest #perceptual rating difference. 
+# We can do this by defining the quadrants and computing the differences, #or by calculating the difference between the morph and the original, then #computing the average difference for participants' ratings.
+  
+head(nonlinearity_df_dcast)
+
+nonlinearity_df_dcast
+
+# This code computes the differences between 'Original' and 'Morph' for each of the numeric variables (nonlinearity, linearity, curvature, entropy) and adds these as new columns to the dataframe.
+
+nonlinearity_df_dcast<- nonlinearity_df_dcast %>%
+  mutate(
+    diff_Nonlin_Orig_Morph = nonlinearity_Original - nonlinearity_Morph,
+    diff_Lin_Orig_Morph = linearity_Original - linearity_Morph,
+    diff_Curv_Orig_Morph = curvature_Original - curvature_Morph,
+   diff_Entropy_Orig_Morph = entropy_Original - entropy_Morph
+  )
+
+
+# select just essetial columns
+colnames(is.na(db_ASC_NT_2023))
+
+table(is.na(db_ASC_NT_2023$linearity))
+db_ASC_NT_2021
+
+
+db_ASC_NT_2023_NT<-db_ASC_NT_2021%>%subset(db_ASC_NT_2021$Group == "NT")
+
+colnames(db_ASC_NT_2023_NT)
+db_ASC_NT_2023_NT
+db_ASC_NT_2023_NT$Actor_ID
+
+
+db_ASC_NT_2023_NT<-   db_ASC_NT_2023_NT%>%select(c(1:4,84,86,88,24,6:8,10,15))
+colnames(db_ASC_NT_2023_NT)
+# db_ASC_NT_2023$Recognacc
+# 
+# table(is.na(nonlinearity_dfsel$linearity))
+# 
+# unique(db_ASC_NT_2023_NT$Emotion)
+# unique(nonlinearity_dfsel$Emotion)
+# unique(nonlinearity_dfsel$stim_id)
+# unique(db_ASC_NT_2023_NT$stim_id)
+
+
+```
+
+debugging
+# Define two vectors
+vector1 <- unique(nonlinearity_dfsel$stim_id)
+vector2 <- unique(db_ASC_NT_2023_NT$stim_id)
+
+# need to replacejoy for happiness, note that this emans the lmer models need to be re-analysed
+
+# Replace 'cats' with 'dogs'
+nonlinearity_dfsel$stim_id<- gsub("Joy", "Happiness", nonlinearity_dfsel$stim_id)
+
+
+# Find the differences
+diff_vector1_vector2 <- setdiff(vector1, vector2)  # Elements in vector1 but not in vector2
+diff_vector2_vector1 <- setdiff(vector2, vector1)  # Elements in vector2 but not in vector1
+
+print(paste("Elements in vector1 but not in vector2: ", paste(diff_vector1_vector2, collapse=", ")))
+print(paste("Elements in vector2 but not in vector1: ", paste(diff_vector2_vector1, collapse=", ")))
+
+
+```{r}
+
+# db_ASC_NT_2023_NT<- left_join(db_ASC_NT_2023_NT, nonlinearity_dfsel)
+# table(is.na(db_ASC_NT_2023_NT$linearity)) #should be all FALSE
+# db_ASC_NT_2023_NT<-db_ASC_NT_2023%>%subset(db_ASC_NT_2023$Group == "NT")%>%
+#   select(c(1:4,24,6:8,10,15,104,106,107,110:113))
+
+colnames(db_ASC_NT_2023_NT)
+
+# Reshape data
+
+
+db_ASC_NT_2023_NT
+  
+table(is.na(db_ASC_NT_2023_NT$linearity))
+
+table(is.na(db_ASC_NT_2023_NT$linearity))
+  
+colnames(db_ASC_NT_2023_NT)
+db_ASC_NT_2023_NT$Block<-NULL
+db_ASC_NT_2023_NT$face_unique<- substr(db_ASC_NT_2023_NT$stim_id,1,3)
+
+db_ASC_NT_2023_NT
+colnames(db_ASC_NT_2023_NT)
+
+DT_wide <- melt(db_ASC_NT_2023_NT[,c(1,3,7,8,13,9:12)], id.vars = c("ParticipantPrivateID", "Emotion", "DATASET","face_unique", "VideoType"),
+                measure.vars = c("AnswerRating_Intensity", "AnswerRating_Naturality", 
+                                 "Recognacc", "AnswerRating_Valence"),
+                variable.name = "Metric", value.name = "Value")
+
+unique(DT_wide$Value)
+table(is.na(DT_wide$Value))
+
+DT_wide2 <- dcast(DT_wide, ParticipantPrivateID + Emotion + DATASET + face_unique ~ paste0(Metric, "_", VideoType),
+                 value.var = "Value",
+                 fun.aggregate = mean,
+                 na.rm = TRUE)
+
+colnames(DT_wide2)
+
+
+table(is.na(DT_wide2$AnswerRating_Intensity_Morph))
+
+# Replace NaN with NA in a dataframe
+df <- data.frame(a = c(1, 2, NaN, 4, 5), 
+                 b = c(NaN, 2, 3, 4, 5))
+
+DT_wide2[] <- lapply(DT_wide2, function(x) {x[is.nan(x)] <- NA; x})
+
+
+
+# Add new columns computing the differences
+options(scipen = 999)
+
+DT_wide2$AnswerRating_Intensity_Morph- DT_wide2$AnswerRating_Intensity_Original
+
+
+# lest try remove NA rows
+
+DT_wide2naomit<- na.omit(DT_wide2)
+
+table(DT_wide2naomit$ParticipantPrivateID)
+unique(DT_wide2naomit$ParticipantPrivateID)
+
+DT_wide2naomit$ParticipantPrivateID<- as.factor(as.character(DT_wide2naomit$ParticipantPrivateID))
+DT_wide2naomit$ParticipantPrivateID
+table(DT_wide2naomit$ParticipantPrivateID, DT_wide2naomit$DATASET)
+
+
+
+# DT_wide2naomi
+# DT_wide2test<- DT_wide2%>%
+#   group_by(ParticipantPrivateID, Emotion, DATASET, face_unique)%>%
+#   summarise_if(is.numeric, mean, na.rm = T)
+# 
+# cor(abs(DT_wide2test$AnswerRating_Intensity_Morph-
+# DT_wide2test$AnswerRating_Intensity_Original),abs(DT_wide2test$AnswerRating_Valence_Morph-
+# DT_wide2test$AnswerRating_Valence_Original))
+
+
+cor(DT_wide2test$AnswerRating_Intensity_Morph,DT_wide2test$AnswerRating_Intensity_Original)
+DT_wide2naomit<-DT_wide2naomit%>%
+  mutate(
+    diff_Intensity = AnswerRating_Intensity_Original - AnswerRating_Intensity_Morph,
+    diff_Naturality = AnswerRating_Naturality_Original - AnswerRating_Naturality_Morph,
+    diff_Recognition = Recognacc_Original - Recognacc_Morph,
+    diff_Valence = AnswerRating_Valence_Original - AnswerRating_Valence_Morph  )
+    # diff_Curvature = curvature_Original - curvature_Morph,
+    # diff_Entropy = entropy_Original - entropy_Morph,
+    # diff_Linearity = linearity_Original - linearity_Morph,
+    # diff_Nonlinearity = nonlinearity_Original - nonlinearity_Morph
+
+    
+    DT_wide2naomit%>%
+  ggplot(aes(abs(diff_Naturality),abs(diff_Valence)))+
+  # geom_jitter()+
+  geom_point()+
+  # geom_smooth(method = "lm",se = F)+
+  facet_grid(~DATASET)
+
+
+    
+    nonlinearity_df_dcast$linearity_quadrant<- 
+  left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         group_by(face_unique,DATASET, Emotion )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(abs(diff_Curv_Orig_Morph), abs(diff_Valence)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    # facet_grid(~DATASET)+
+    ggpubr::stat_cor()
+  
+    left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         group_by(face_unique,DATASET, Emotion )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes((diff_Curv_Orig_Morph), (diff_Valence)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    # facet_grid(~DATASET)+
+    ggpubr::stat_cor()
+    
+    
+        left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         group_by(face_unique,DATASET, Emotion )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(abs(diff_Lin_Orig_Morph), abs(diff_Valence)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    # facet_grid(~DATASET)+
+    ggpubr::stat_cor()
+        
+        
+        nonlinearity_df_dcast$linearity_quad <-if_else(nonlinearity_df_dcast$linearity_Morph>0 &
+                                                         nonlinearity_df_dcast$linearity_Original
+                                                       >0, 1, 
+                                                       
+                                                       
+                                                       if_else(nonlinearity_df_dcast$linearity_Morph>0 &
+                                                         nonlinearity_df_dcast$linearity_Original
+                                                       <0, 2, 
+                                                       
+                                                         if_else(nonlinearity_df_dcast$linearity_Morph<0 &
+                                                         nonlinearity_df_dcast$linearity_Original
+                                                       <0, 1,
+                                                        if_else(nonlinearity_df_dcast$linearity_Morph<0 &
+                                                         nonlinearity_df_dcast$linearity_Original
+                                                       >0, 2,0)))
+                                                       
+                                                       )
+        
+        
+        
+nonlinearity_df_dcast$curv_quad <-if_else(nonlinearity_df_dcast$curvature_Morph>0 &
+                                                         nonlinearity_df_dcast$curvature_Original
+                                                       >0, 1, 
+                                                       
+                                                       
+                                                       if_else(nonlinearity_df_dcast$curvature_Morph>0 &
+                                                         nonlinearity_df_dcast$curvature_Original
+                                                       <0, 2, 
+                                                       
+                                                         if_else(nonlinearity_df_dcast$curvature_Morph<0 &
+                                                         nonlinearity_df_dcast$curvature_Original
+                                                       <0, 1,
+                                                        if_else(nonlinearity_df_dcast$curvature_Morph<0 &
+                                                         nonlinearity_df_dcast$curvature_Original
+                                                       >0, 2,0)))
+                                                       
+                                                       )
+    
+  nonlinearity_df_dcast%>%
+    ggplot(aes(linearity_Morph, linearity_Original, shape = Emotion, color = Emotion))+
+             geom_point()+
+    # facet_grid(~Dataset)+
+    geom_vline(xintercept = 0)+
+    geom_hline(yintercept = 0)
+  
+  
+    nonlinearity_df_dcast%>%
+    ggplot(aes(curvature_Morph, curvature_Original, shape = Emotion, color = Emotion))+
+             geom_point()+
+    # facet_grid(~Dataset)+
+    geom_vline(xintercept = 0)+
+    geom_hline(yintercept = 0)
+```
+
+```{r}
+   left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         # group_by(face_unique,Dataset, Emotion )%>%
+         group_by(ParticipantPrivateID,linearity_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(linearity_quad, abs(diff_Valence)))+
+  stat_summary(geom="pointrange")+
+    # geom_jitter()
+      facet_grid(~Dataset)
+
+
+   left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+          group_by(ParticipantPrivateID,curv_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(as.factor(curv_quad), abs(diff_Valence)))+
+  stat_summary(geom="pointrange")+
+      # geom_jitter(width = .1)
+    # geom_point()+
+      facet_grid(~Dataset)
+   
+   
+   #diff_Intensity 
+    left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         # group_by(face_unique,Dataset, Emotion )%>%
+         group_by(ParticipantPrivateID,linearity_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(linearity_quad, abs(diff_Intensity)))+
+  stat_summary(geom="pointrange")+
+    # geom_jitter()
+      facet_grid(~Dataset)
+
+
+   left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+          group_by(ParticipantPrivateID,curv_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(as.factor(curv_quad), abs(diff_Intensity)))+
+  stat_summary(geom="pointrange")+
+      # geom_jitter(width = .1)
+    # geom_point()+
+      facet_grid(~Dataset)
+   
+   # naturality
+   
+  #diff_Naturality 
+    left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         # group_by(face_unique,Dataset, Emotion )%>%
+         group_by(ParticipantPrivateID,linearity_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(linearity_quad, abs(diff_Naturality)))+
+  stat_summary(geom="pointrange")+
+    # geom_jitter()
+      facet_grid(~Dataset)
+
+
+   left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+          group_by(ParticipantPrivateID,curv_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(as.factor(curv_quad), abs(diff_Naturality)))+
+  stat_summary(geom="pointrange")+
+      # geom_jitter(width = .1)
+    # geom_point()+
+      facet_grid(~Dataset)  
+   
+   # accuracy
+   
+   left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+          group_by(ParticipantPrivateID,curv_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(as.factor(curv_quad), abs(diff_Intensity)))+
+  stat_summary(geom="pointrange")+
+      # geom_jitter(width = .1)
+    # geom_point()+
+      facet_grid(~Dataset)
+   
+   # naturality
+   
+  #diff_Recognition 
+    left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         # group_by(face_unique,Dataset, Emotion )%>%
+         group_by(ParticipantPrivateID,linearity_quad,Dataset )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(linearity_quad, abs(diff_Recognition)))+
+  stat_summary(geom="pointrange")+
+    # geom_jitter()
+      facet_grid(~Dataset)
+
+
+   left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+          group_by(ParticipantPrivateID,curv_quad,Dataset,Emotion )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(as.factor(curv_quad), abs(diff_Recognition)))+
+  stat_summary(geom="pointrange")+
+      # geom_jitter(width = .1)
+    # geom_point()+
+      facet_grid(Emotion~Dataset)  
+   
+   
+diff_dataset<-   left_join(nonlinearity_df_dcast,  DT_wide2naomit)
+diff_dataset$stim_idnew <-paste0(diff_dataset$face_unique,diff_dataset$Emotion,paste0(diff_dataset$Dataset))
+diff_dataset$stim_idnew
+diff_dataset<- diff_dataset%>%
+mutate(diff_Curv_Orig_Morph_abs= abs(diff_Curv_Orig_Morph),
+       diff_Lin_Orig_Morph_abs = abs(diff_Lin_Orig_Morph),
+       diff_Valence_abs = abs(diff_Valence))
+
+mod_diff<- list()       
+ mod_diff$val_diff<- lmer(diff_Valence_abs ~Dataset*diff_Lin_Orig_Morph_abs+diff_Curv_Orig_Morph_abs+
+       (1|ParticipantPrivateID)+(1|stim_idnew),
+     REML = FALSE,
+     data = diff_dataset)
+
+```
+
+   left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         group_by(face_unique,DATASET, Emotion )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(abs(diff_Lin_Orig_Morph), abs(diff_Valence)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    # facet_grid(~DATASET)+
+    ggpubr::stat_cor()
+
+
+
+    
+    
+     left_join(nonlinearity_df_dcast,  DT_wide2naomit)%>%
+         group_by(face_unique,DATASET, Emotion )%>%
+    summarise_if(is.numeric, mean, na.rmn = T)%>%
+    ggplot(aes(abs(diff_Curv_Orig_Morph), abs(diff_Valence)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    # facet_grid(~DATASET)+
+    ggpubr::stat_cor()
+      
+      
+```
+  
+  
+  
+    left_join(nonlinearity_df_dcast,  DT_wide2test)%>%
+    ggplot(aes(abs(diff_Lin_Orig_Morph), abs(diff_Intensity)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    facet_grid(~Dataset)+
+    ggpubr::stat_cor()
+    
+      left_join(nonlinearity_df_dcast,  DT_wide2test)%>%
+    ggplot(aes(abs(diff_Curv_Orig_Morph), abs(diff_Intensity)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    facet_grid(~Dataset)+
+    ggpubr::stat_cor()
+  
+      
+          left_join(nonlinearity_df_dcast,  DT_wide2test)%>%
+    ggplot(aes(abs(diff_Lin_Orig_Morph), abs(diff_Recognition)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    facet_grid(~Dataset)+
+    ggpubr::stat_cor()
+    
+      left_join(nonlinearity_df_dcast,  DT_wide2test)%>%
+        group_by(face_unique,DATASET, Emotion )%>%
+    ggplot(aes(abs(diff_Curv_Orig_Morph), abs(diff_Recognition)))+
+    geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+    facet_grid(~Dataset)+
+    ggpubr::stat_cor()
+      
+```
+  
+  
+  DT_wide2%>%
+  mutate(
+    diff_Intensity = AnswerRating_Intensity_Original - AnswerRating_Intensity_Morph,
+    diff_Naturality = AnswerRating_Naturality_Original - AnswerRating_Naturality_Morph,
+    diff_Recognition = AnswerRating_Recognition_Original - AnswerRating_Recognition_Morph,
+    diff_Valence = AnswerRating_Valence_Original - AnswerRating_Valence_Morph,
+    diff_Curvature = curvature_Original - curvature_Morph,
+    diff_Entropy = entropy_Original - entropy_Morph,
+    diff_Linearity = linearity_Original - linearity_Morph,
+    diff_Nonlinearity = nonlinearity_Original - nonlinearity_Morph
+  )
+  group_by(Emotion, DATASET, face_unique)%>%
+  summarise_if(is.numeric, mean, na.rm = T)%>%
+  ggplot(aes(abs(diff_Linearity)))+
+  geom_histogram()
+  geom_point()+
+  # geom_smooth(method = "lm",se = F)+
+  facet_grid(~DATASET)+
+  xlim(0,.1)
+  ggpubr::stat_cor()
+  
+nonlinearity_dfsel%>%
+  ggplot(aes(linearity))+
+  geom_histogram()
+
+db_ASC_NT_2023_NT%>%
+  group_by(filename,VideoType,DATASET)%>%
+  summarise_if(is.numeric, mean, na.rm = T)%>%
+    ggplot(aes(linearity))+
+  geom_histogram()+
+  facet_grid(VideoType~DATASET)
+
+DT_wide%>%
+    ggplot(aes(linearity_Original))+
+  geom_histogram()
+
+
+DT_wide%>%
+    ggplot(aes(linearity_Morph))+
+  geom_histogram()
+
+```

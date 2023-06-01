@@ -212,12 +212,17 @@ eff_size(paper_analyses$lmer_NT_val_DS, edf = paper_analyses$lmer_NT_val@vcov_va
 
 
 paper_analyses$lmer_NT_val$analyze_report<- analyze(paper_analyses$lmer_NT_val)
+
+
 library(sjstats)
 std_beta(paper_analyses$lmer_NT_val, ci.lvl = 0.95)
 
 library(MuMIn)
 r.squaredGLMM(paper_analyses$lmer_NT_val)
 r.squaredGLMM(paper_analyses$lmer_NT_val_novt) #videotype makes a very small contribution
+
+# load poly effects
+poly_ranef_df <- readRDS("~/Library/CloudStorage/GoogleDrive-helioclemente.c@gmail.com/My Drive/Papers2023/FaceDynamics/Face Morph Paper/Data/poly_ranef_df.rds")
 ```
 
 
