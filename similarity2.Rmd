@@ -1,0 +1,369 @@
+---
+title: "similarity2"
+output: html_document
+date: "2023-06-19"
+---
+
+db_ASC_NT_2023.1_agg_acrssmrph
+
+```{r}
+db_NT_lmer_correlation_merged3_agg
+
+db_ASC_NT_lmer_correlation_merged
+unique(db_ASC_NT_lmer_correlation_merged$DATASET)
+
+db_ASC_NT_lmer_correlation_merged$TAS_score_total.x
+db_ASC_NT_lmer_correlation_merged$valence_morph_orig_cor
+install.packages("psycho")
+
+# library(psycho)
+# install.packages("psych")
+# psych::fisherz()
+# install.packages("ggpubr")
+
+db_ASC_NT_lmer_correlation_merged%>%
+  
+  subset(!is.nan(TAS_score_total.x))%>%
+  ggplot(aes(TAS_score_total.x, psych::fisherz(valence_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+  facet_grid(~DATASET)
+
+
+db_ASC_NT_lmer_correlation_merged%>%
+  
+  subset(!is.nan(AQ_score_total.x))%>%
+  ggplot(aes(AQ_score_total.x, psych::fisherz(valence_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+  facet_grid(~DATASET)
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(TAS_score_total.x)) %>%
+  ggplot(aes(TAS_score_total.x, psych::fisherz(valence_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()
+
+# 
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(TAS_score_total.x)) %>%
+  ggplot(aes(TAS_score_total.x, psych::fisherz(valence_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(AQ_score_total.x)) %>%
+  ggplot(aes(AQ_score_total.x, psych::fisherz(valence_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()
+
+# intensity
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  # summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(TAS_score_total.x)) %>%
+  ggplot(aes(TAS_score_total.x, psych::fisherz(intensity_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+    facet_grid(~DATASET)
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  # summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(AQ_score_total.x)) %>%
+  ggplot(aes(AQ_score_total.x, psych::fisherz(intensity_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+    facet_grid(~DATASET)
+  
+
+# naturality
+# intensity
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  # summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(TAS_score_total.x)) %>%
+  ggplot(aes(TAS_score_total.x, psych::fisherz(naturality_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+    facet_grid(~DATASET)
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  # summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(AQ_score_total.x)) %>%
+  ggplot(aes(AQ_score_total.x, psych::fisherz(naturality_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+    facet_grid(~DATASET)
+
+# accuracy
+
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  # summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(TAS_score_total.x)) %>%
+  ggplot(aes(TAS_score_total.x, psych::fisherz(acc_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+    facet_grid(~DATASET)
+
+db_ASC_NT_lmer_correlation_merged %>%
+  group_by(ParticipantPrivateID) %>%
+  # summarise_if(is.numeric, mean, na.rm = T)%>%
+  subset(!is.nan(AQ_score_total.x)) %>%
+  ggplot(aes(AQ_score_total.x, psych::fisherz(acc_morph_orig_cor)))+
+  geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+  ggpubr::stat_cor()+
+    facet_grid(~DATASET)
+
+
+# median split
+
+db_ASC_NT_lmer_correlation_merged%>%
+  # mutate(valence_morph_orig_cor  =  )%>%
+    subset(!is.nan(AQ_score_total.x))%>%
+  ungroup()%>%
+  group_by(DATASET)%>%
+  mutate(med_split = if_else(psych::fisherz(valence_morph_orig_cor) > median(psych::fisherz(valence_morph_orig_cor), na.rm = T), "high", "low"))%>%
+  ggplot(aes(med_split, TAS_score_total.x))+
+  stat_summary(geom = "pointrange")+
+  # geom_point()+
+  geom_jitter(alpha=.1, width = .2)+
+  ggpubr::stat_compare_means()+
+  facet_grid(~DATASET)
+```
+
+
+try some clustering
+```{r}
+db_NT_lmer_correlation_merged3_agg
+
+correlation_merge_full<-
+bind_rows(db_NT_lmer_correlation_merged3_agg, db_NT_lmer_correlation_merged3_agg1)%>%
+    mutate(DATASET = as.factor(DATASET))%>%
+    mutate(DATASET = relevel(DATASET, ref = 'All'))%>%
+    group_by(DATASET)%>%
+    mutate(mean_val_cor = mean(valence_morph_orig_cor))
+correlation_merge_full
+
+db_NT_lmer_correlation_merged3_agg
+
+db_NT_lmer_correlation_merged3_agg_agg<- db_NT_lmer_correlation_merged3_agg%>%
+  group_by(ParticipantPrivateID)%>%
+  summarise_if(is.numeric, mean,na.rm = T)
+
+write_csv(db_NT_lmer_correlation_merged3_agg_agg, "db_NT_lmer_correlation_merged3_agg_agg.csv")
+
+
+colnames(db_NT_lmer_correlation_merged3_agg)
+colnames(db_NT_lmer_correlation_merged3_agg[,c(1:2,31:34)])
+db_NT_lmer_correlation_merged3_agg[,c(1:2,31:34)]%>%
+  dcast()
+
+
+
+# Reshape to wide format excluding ParticipantPrivateID
+library(data.table)
+db_NT_lmer_correlation_merged3_agg<- db_NT_lmer_correlation_merged3_agg%>%ungroup()
+
+dcast(melt(db_NT_lmer_correlation_merged3_agg, 
+           
+           id.vars = c("DATASET", "ParticipantPrivateID"), 
+                           measure.vars = c("intensity_morph_orig_cor_z", "valence_morph_orig_cor_z", 
+                                            "naturality_morph_orig_cor_z", "acc_morph_orig_cor_z")), 
+                     DATASET ~ variable, value.var = "value")
+
+
+
+# Load tidyverse
+library(tidyverse)
+
+# Convert to long format
+ db_NT_lmer_correlation_merged3_agg[,c(1:2,31:34)] %>%
+   ungroup()%>%
+  gather(key = "variable", value = "value", 
+         intensity_morph_orig_cor_z, valence_morph_orig_cor_z, 
+         naturality_morph_orig_cor_z, acc_morph_orig_cor_z) %>%
+   mutate(variable = paste0(DATASET, variable))%>%
+  spread(key = variable, value = value)%>%
+   group_by(ParticipantPrivateID)%>%
+   summarise_if(is.numeric, mean, na.rm =T)%>%
+   ggplot(aes(JEFFEintensity_morph_orig_cor_z, ADFESintensity_morph_orig_cor_z))+
+   geom_point()+
+     geom_smooth(method = 'lm', se = F)+
+   ggpubr::stat_cor()
+
+```
+ 
+ 
+```{r}
+ db_NT_lmer_correlation_merged3_agg[,c(1:2,31:34)] %>%
+   ungroup()%>%
+  gather(key = "variable", value = "value", 
+         intensity_morph_orig_cor_z, valence_morph_orig_cor_z, 
+         naturality_morph_orig_cor_z, acc_morph_orig_cor_z) %>%
+   mutate(variable = paste0(DATASET, variable))%>%
+  spread(key = variable, value = value)%>%
+   group_by(ParticipantPrivateID)%>%
+   summarise_if(is.numeric, mean, na.rm =T)%>%
+   ggplot(aes(JEFFEvalence_morph_orig_cor_z, ADFESvalence_morph_orig_cor_z))+
+   geom_point()+
+  geom_smooth(method = 'lm', se = F)+
+   ggpubr::stat_cor()
+ 
+```
+
+
+```{r}
+ db_NT_lmer_correlation_merged3_agg[,c(1:2,31:34)] %>%
+   ungroup()%>%
+  gather(key = "variable", value = "value", 
+         intensity_morph_orig_cor_z, valence_morph_orig_cor_z, 
+         naturality_morph_orig_cor_z, acc_morph_orig_cor_z) %>%
+   mutate(variable = paste0(DATASET, variable))%>%
+  spread(key = variable, value = value)%>%
+   group_by(ParticipantPrivateID)%>%
+   summarise_if(is.numeric, mean, na.rm =T)%>%
+   ggplot(aes(JEFFEnaturality_morph_orig_cor_z, ADFESnaturality_morph_orig_cor_z))+
+   geom_point()+
+    geom_smooth(method = 'lm', se = F)+
+  
+   ggpubr::stat_cor()
+ 
+```
+ 
+ 
+```{r} 
+db_NT_lmer_correlation_merged3_agg[,c(1:2,31:34)] %>%
+   ungroup()%>%
+  gather(key = "variable", value = "value", 
+         intensity_morph_orig_cor_z, valence_morph_orig_cor_z, 
+         naturality_morph_orig_cor_z, acc_morph_orig_cor_z) %>%
+   mutate(variable = paste0(DATASET, variable))%>%
+  spread(key = variable, value = value)%>%
+   group_by(ParticipantPrivateID)%>%
+   summarise_if(is.numeric, mean, na.rm =T)%>%
+   ggplot(aes(JEFFEacc_morph_orig_cor_z, ADFESacc_morph_orig_cor_z))+
+   geom_point()+
+   geom_smooth(method = "lm",se = F)+
+   ggpubr::stat_cor()
+ 
+ 
+```
+
+
+```{r}
+
+# confusiion
+ 
+ # db_NT_lmer_correlation_merged3_agg$
+ 
+ confusion_byds_vt_full_ASCNT
+ confusion_byds_vt_full_cor
+ 
+  db_NT_lmer_correlation_merged3_agg[,c(1:2,31:34)]
+  
+  colnames(confusion_byds_vt_full_coragg)
+  confusion_byds_vt_full_coragg
+  
+  confusion_byds_vt_full_coragg[,c(1:2,8)]%>%
+    subset( cor_morph_orig_z<10)%>%
+    
+ 
+ ungroup()%>%
+  gather(key = "variable", value = "value", 
+         cor_morph_orig_z) %>%
+   mutate(variable = paste0(DATASET, variable))%>%
+  spread(key = variable, value = value)%>%
+   group_by(Participant) %>%
+   summarise_if(is.numeric, mean, na.rm =T)%>%
+   ggplot(aes(ADFEScor_morph_orig_z, JEFFEcor_morph_orig_z))+
+   geom_point()+
+   ggpubr::stat_cor()
+ 
+ colnames(confusion_byds_vt_full_coragg_noout)
+ 
+ confusion_byds_vt_full_coragg_noout%>%
+   subset(cor_morph_orig_outlier !="YES" )%>%
+ confusion_byds_vt_full_coragg_noout[,c(1:2,7)]%>%
+   ungroup()%>%
+  gather(key = "variable", value = "value", 
+         cor_morph_orig) %>%
+   mutate(variable = paste0(DATASET, variable))%>%
+  spread(key = variable, value = value)%>%
+   group_by(Participant) %>%
+   summarise_if(is.numeric, mean, na.rm =T)%>%
+   ggplot(aes(ADFEScor_morph_orig, JEFFEcor_morph_orig))+
+   geom_point()+
+   ggpubr::stat_cor()
+   
+ 
+ confusion_byds_vt_full_ASCNT_coragg
+```
+
+do we need a repeated measures correlation here?
+
+```{r}
+install.packages("rmcorr")
+
+library(rmcorr)
+
+db_NT_lmer_correlation_merged3
+?rmcorr::rmcorr
+
+tmp_rmcor1<- rmcorr::rmcorr(participant = "ParticipantPrivateID",
+               measure1 = "AnswerRating_Valence.x",
+                measure2 = "AnswerRating_Valence.y",
+  
+  dataset = db_NT_lmer_correlation_merged3%>%
+    subset(DATASET == "ADFES"))
+rmcorr::rmcorr(tmp_rmcor1)
+
+
+tmp_rmcor1_jeffe<- rmcorr::rmcorr(participant = "ParticipantPrivateID",
+               measure1 = "AnswerRating_Valence.x",
+                measure2 = "AnswerRating_Valence.y",
+  
+  dataset = db_NT_lmer_correlation_merged3%>%
+    subset(DATASET != "ADFES"))
+rmcorr::rmcorr(tmp_rmcor1)
+
+plot(tmp_rmcor1)
+plot(tmp_rmcor1_jeffe)
+
+
+tmp_rmcor1_jeffe$r
+tmp_rmcor1_jeffe$df
+tmp_rmcor1_jeffe$model$model
+
+rmcorr::rmcorr(participant = "ParticipantPrivateID",
+               measure1 = "AnswerRating_Intensity.x",
+                measure2 = "AnswerRating_Intensity.y",
+  
+  dataset = db_NT_lmer_correlation_merged3%>%
+    subset(DATASET == "ADFES"))
+
+
+```

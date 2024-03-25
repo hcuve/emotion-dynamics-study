@@ -360,6 +360,23 @@ new_matrix_plot
 
 ```{r}
 
+View(confusion_byds_vt_full_coragg)
+
+left_join(
+confusion_byds_vt_full_coragg%>%
+  subset(DATASET == "ADFES")%>%
+  select(cor_morph_orig),
+
+confusion_byds_vt_full_coragg%>%
+  subset(DATASET != "ADFES")%>%
+  select(cor_morph_orig),by= "Participant")%>%
+  ggplot(aes(cor_morph_orig.x, cor_morph_orig.y))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  ggpubr::stat_cor()
+
+```
+```{r}
 paper_plots$Representation <- 
 bind_rows(confusion_byds_vt_full_coragg_ttest, confusion_byds_vt_full_coragg)%>%
   mutate(DATASET = as.factor(DATASET))%>%
@@ -406,10 +423,13 @@ paper_plots$Representation<- paper_plots$Representation+
   scale_fill_brewer(palette = "Dark2")
 
 paper_plots$Representation
+
+View(confusion_byds_vt_full_coragg_ttest)
 ```
 
 
 ```{r}
+View(confusion_byds_vt_full_cor_nodiagnonal_agg1)
 
 # off Diagonal()
 library(psych)
@@ -431,6 +451,25 @@ library(psych)
  confusion_byds_vt_full_cor_nodiagnonal_agg1$DATASET<- "Global"
  
  
+ 
+ 
+```
+
+```{r}
+confusion_byds_vt_full_cor_nodiagnonal_agg
+ left_join(
+confusion_byds_vt_full_cor_nodiagnonal_agg%>%
+  subset(DATASET == "ADFES")%>%
+  select(cor_morph_orig_z),
+
+confusion_byds_vt_full_cor_nodiagnonal_agg%>%
+  subset(DATASET != "ADFES")%>%
+  select(cor_morph_orig_z),by= "Participant")%>%
+  ggplot(aes(cor_morph_orig_z.x, cor_morph_orig_z.y))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  ggpubr::stat_cor()
+```
 paper_plots$Representation_nodiag<-
 bind_rows(confusion_byds_vt_full_cor_nodiagnonal_agg, confusion_byds_vt_full_cor_nodiagnonal_agg1)%>%
   # confusion_byds_vt_full_cor%>%
@@ -933,5 +972,12 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
         params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
 }
 
+
+```
+
+
+```
+```{r}
+rm()
 
 ```

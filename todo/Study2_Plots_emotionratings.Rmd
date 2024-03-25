@@ -109,7 +109,9 @@ scale_colour_Publication <- function(...){
 Valence
 
 ```{r}
-paper_plots$ADFES_valence<- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'ADFES')%>%
+paper_plots$ADFES_valence<-
+
+subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_NT$DATASET == 'ADFES')%>%
   filter(outlier_valence == FALSE)%>%
   group_by(VideoType,Emotion, Emotion2, DATASET)%>%
   mutate(mean_in = mean(AnswerRating_Valence, na.rm = TRUE))%>%
@@ -118,6 +120,7 @@ paper_plots$ADFES_valence<- subset(db_ASC_NT, db_ASC_NT $Group == "NT" & db_ASC_
   # ggplot(aes(Emotion2, AnswerRating_Valence, colour = VideoType))+
   ggplot(aes(VideoType, AnswerRating_Valence, 
              color = VideoType, fill = VideoType))+
+  # ggside::geom_ysidedensity(alpha = .3)+
   geom_split_violin(color = FALSE, alpha = .3)+
   geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F, 
               color = "gray80", alpha = .5,size = .5)+
@@ -433,7 +436,9 @@ paper_plots$JEFFE_acc
 
 ```{r}
 
-paper_plots$JEFFE_acc<- subset(db_ASC_NT, db_ASC_NT $Group == "NT" 
+paper_plots$JEFFE_acc
+
+subset(db_ASC_NT, db_ASC_NT $Group == "NT" 
                                & db_ASC_NT$DATASET == 'JEFFE')%>%
   filter(outlier_valence == FALSE)%>%
   group_by(VideoType,Emotion, Emotion2, DATASET)%>%
@@ -442,7 +447,8 @@ paper_plots$JEFFE_acc<- subset(db_ASC_NT, db_ASC_NT $Group == "NT"
   summarise_if(is.numeric, mean, na.rm = TRUE)%>%
   ggplot(aes(VideoType, Recognacc, 
              color = VideoType, fill = VideoType))+
-  geom_split_violin(color = FALSE, alpha = .3)+
+  ggside::geom_xsidedensity()+
+  # geom_split_violin(color = FALSE, alpha = .3)+
   geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F, 
               color = "gray80", alpha = .5,size = .5)+
   geom_point(fill = NA, pch = 21, position = position_jitterdodge(), alpha = .5)+
@@ -457,6 +463,13 @@ paper_plots$JEFFE_acc<- subset(db_ASC_NT, db_ASC_NT $Group == "NT"
   theme_classic()+
   ylab("Accuracy")+
   ggtitle("Low Prototypicality")
+
+
+```
+
+
+
+```{r}
 
 
 
@@ -485,7 +498,11 @@ aggregated accuracy across emotions
 
 db_ASC_NT$DATASETnew<- if_else(db_ASC_NT$DATASET == "ADFES", "High prototypicality",
                                "Low prototypicality")
-paper_plots$acc_agg1<- subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
+
+
+paper_plots$acc_agg1<-
+
+subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
   filter(outlier_valence == FALSE)%>%
   # group_by(VideoType,Emotion, Emotion2, DATASET)%>%
   # mutate(mean_acc = mean(Recognacc, na.rm = TRUE))%>%
@@ -494,7 +511,9 @@ paper_plots$acc_agg1<- subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
   ggplot(aes(VideoType, Recognacc, 
              color = VideoType, fill = VideoType))+
   
-  geom_split_violin(color = FALSE, alpha = .3)+
+  ggside::geom_ysidedensity(alpha = .3)+
+  # geom_split_violin(color = FALSE, alpha = .3)+
+  
   geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F, 
               color = "gray80", alpha = .5,size = .5)+
   geom_point(fill = NA, pch = 21, position = position_jitterdodge(), alpha = .5)+
@@ -512,7 +531,10 @@ paper_plots$acc_agg1<- subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
   theme_classic()+
   ylab("Accuracy")
 
+
+
 paper_plots$acc_agg1
+
 paper_plots$acc_agg1<- paper_plots$acc_agg1 +
   p$graphstyle+
   scale_y_continuous(breaks = c(.2, .6,1), limits = c(.2,1))+
@@ -524,19 +546,86 @@ paper_plots$acc_agg1
 
 ```
 
+```{r}
+#' geom_split_violin_HELPER
+#'
+#' @format NULL
+#' @usage NULL
+#' @name gsv_helper
+#' @keywords internal
+
+GeomSplitViolin <- ggplot2::ggproto("GeomSplitViolin", ggplot2::GeomViolin, draw_group = function(self, data, ..., draw_quantiles = NULL){
+  data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
+  grp <- data[1,'group']
+  newdata <- plyr::arrange(transform(data, x = if(grp%%2==1) xminv else xmaxv), if(grp%%2==1) y else -y)
+  newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
+  newdata[c(1,nrow(newdata)-1,nrow(newdata)), 'x'] <- round(newdata[1, 'x'])
+  if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
+    stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <=
+                                              1))
+    quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
+    aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
+    aesthetics$alpha <- rep(1, nrow(quantiles))
+    both <- cbind(quantiles, aesthetics)
+    quantile_grob <- ggplot2::GeomPath$draw_panel(both, ...)
+    ggplot2:::ggname("geom_split_violin", grid::grobTree(ggplot2::GeomPolygon$draw_panel(newdata, ...), quantile_grob))
+  }
+  else {
+    ggplot2:::ggname("geom_split_violin", ggplot2::GeomPolygon$draw_panel(newdata, ...))
+  }
+})
+
+#' Split violin geom
+#'
+#' Create split violin plot with ggplot2 with geom_split_violin. Shamelessly copy-pasted from \href{https://stackoverflow.com/questions/35717353/split-violin-plot-with-ggplot/}{jan-glx at Stack Overflow}.
+#'
+#' @param stat A value
+#' @param draw_quantiles A value
+#' @param trim A value
+#' @param scale A value
+#' @param na.rm A value
+#'
+#' @examples
+#'
+#'set.seed(123)
+#'
+#' my_data = tibble::tibble(
+#'  x=c(rep('a', 200), rep('b', 200)),
+#'  y=c(rnorm(100), rnorm(100, 0.5), rnorm(100, 1), rnorm(100, 1.5)),
+#'  cond=c(rep('i', 100), rep('j', 200), rep('i', 100))
+#' )
+#'
+#' ggplot2::ggplot(my_data, ggplot2::aes(x, y, fill=cond)) +
+#' geom_split_violin()
+#'
+#'
+#' @inheritParams ggplot2::stat_identity
+#' @export
+#'
+geom_split_violin <- function (mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ..., draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE) {
+  ggplot2::layer(data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin, position = position, show.legend = show.legend, inherit.aes = inherit.aes, params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
+}
+
+```
 
 
 ```{r}
-paper_plots$acc_agg2<- subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
+paper_plots$acc_agg2
+
+
+subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
   filter(outlier_valence == FALSE)%>%
   # group_by(VideoType,Emotion, Emotion2, DATASET)%>%
   # mutate(mean_acc = mean(Recognacc, na.rm = TRUE))%>%
   group_by(ParticipantPrivateID, VideoType,DATASETnew)%>%
   summarise_if(is.numeric, mean, na.rm = TRUE)%>%
-  ggplot(aes(DATASETnew, Recognacc, 
+  ggplot(aes(VideoType, Recognacc, 
              color = VideoType, fill = VideoType))+
   
-  geom_split_violin(color = FALSE, alpha = .3)+
+    ggside::geom_ysidedensity(aes(group = VideoType), alpha = .3)+
+  
+  # geom_split_violin(color = FALSE, alpha = .3)+
+  
   geom_smooth(aes(group = ParticipantPrivateID), method = 'lm', se = F, 
               color = "gray80", alpha = .5,size = .5)+
   geom_point(fill = NA, pch = 21, position = position_jitterdodge(), alpha = .5)+
@@ -547,7 +636,7 @@ paper_plots$acc_agg2<- subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
                position=position_dodge(width=0.3)) +
   geom_smooth(aes(group = DATASETnew),method = 'lm', se = F, color = "Black",
                alpha = .8,size = 1)+
-    # facet_grid(~DATASET)+
+    facet_grid(~DATASETnew)+
   geom_smooth(aes(group = VideoType),method = 'lm', se = F,
                alpha = .8,size = 1)+
   
@@ -556,6 +645,7 @@ paper_plots$acc_agg2<- subset(db_ASC_NT, db_ASC_NT $Group == "NT")%>%
 
 
 paper_plots$acc_agg2
+
 paper_plots$acc_agg2<- paper_plots$acc_agg2 +
   p$graphstyle+
   scale_y_continuous(breaks = c(.2, .6,1), limits = c(.2,1))+
@@ -565,6 +655,10 @@ paper_plots$acc_agg2<- paper_plots$acc_agg2 +
 
 paper_plots$acc_agg2
 
+```
+
+
+```{r}
 
 paper_plots$panel_acc_agg <- 
  (paper_plots$acc_agg1+ paper_plots$acc_agg2)+

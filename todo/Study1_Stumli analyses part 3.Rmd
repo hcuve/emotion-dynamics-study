@@ -2629,3 +2629,8 @@ polymodels$avgface1_step_ADFES
 
 
 ```
+
+```{r}
+rm(whatis, )
+
+```
